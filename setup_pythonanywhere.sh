@@ -11,7 +11,7 @@ pip install -r requirements.txt
 cat > .env << 'ENVEOF'
 SECRET_KEY=CAMBIA-ESTO-POR-UNA-CLAVE-SECRETA-MUY-LARGA-Y-ALEATORIA-123456789
 DEBUG=False
-ALLOWED_HOSTS=saitapp.pythonanywhere.com
+ALLOWED_HOSTS=saitfgb.pythonanywhere.com
 EMAIL_HOST_USER=tu_email@gmail.com
 EMAIL_HOST_PASSWORD=tu_password_de_app
 EMAIL_DESTINO=felipe.g.bravo@gmail.com
@@ -37,5 +37,5 @@ echo ""
 echo "=== Configuracion completada ==="
 echo "Ahora ve al dashboard de PythonAnywhere y:"
 echo "1. Web > WSGI configuration file > editar"
-echo "2. Web > Static files > agregar /static/ -> /home/saitapp/sait/staticfiles/"
+echo "2. Web > Static files > agregar /static/ -> /home/saitfgb/sait-app/staticfiles/"
 echo "3. Web > Reload"
