@@ -1,0 +1,123 @@
+{% extends 'tecnicos/base.html' %}
+
+{% block title %}Gestión de Usuarios - Movistar{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center">
+            <h1 class="mb-0"><i class="bi bi-people-fill"></i> Gestión de Usuarios</h1>
+            <a href="{% url 'crear_usuario' %}" class="btn btn-success">
+                <i class="bi bi-person-plus"></i> Crear Nuevo Usuario
+            </a>
+        </div>
+        <p class="text-muted mt-2">Total de usuarios: <strong>{{ total_usuarios }}</strong></p>
+    </div>
+</div>
+
+<!-- Tabla de usuarios -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header card-header-movistar">
+                <h5 class="mb-0">Listado de Usuarios del Sistema</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Usuario</th>
+                                <th>Nombre Completo</th>
+                                <th>Correo Electrónico</th>
+                                <th>Grupos</th>
+                                <th class="text-center">Estado</th>
+                                <th class="text-center">Tipo</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for usuario in usuarios %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ usuario.username }}</strong>
+                                        {% if usuario.is_superuser %}
+                                            <span class="badge bg-danger ms-2">Superusuario</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ usuario.first_name }} {{ usuario.last_name }}</td>
+                                    <td>{{ usuario.email|default:"-" }}</td>
+                                    <td>
+                                        {% for grupo in usuario.groups.all %}
+                                            <span class="badge bg-info text-dark">{{ grupo.name }}</span>
+                                        {% empty %}
+                                            <span class="text-muted">Sin grupos</span>
+                                        {% endfor %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if usuario.is_active %}
+                                            <span class="badge bg-success">Activo</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactivo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if usuario.is_staff %}
+                                            <span class="badge bg-warning text-dark">Staff</span>
+                                        {% else %}
+                                            <span class="badge bg-light text-dark">Usuario</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="btn-group btn-group-sm" role="group">
+                                            <a href="{% url 'editar_usuario' usuario.id %}"
+                                               class="btn btn-warning"
+                                               title="Editar usuario">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'cambiar_contrasena_usuario' usuario.id %}"
+                                               class="btn btn-info"
+                                               title="Cambiar contraseña">
+                                                <i class="bi bi-key"></i>
+                                            </a>
+                                            {% if usuario.id != user.id %}
+                                                <form method="post"
+                                                      action="{% url 'eliminar_usuario' usuario.id %}"
+                                                      style="display: inline;"
+                                                      onsubmit="return confirm('¿Está seguro de eliminar al usuario {{ usuario.username }}? Esta acción no se puede deshacer.');">
+                                                    {% csrf_token %}
+                                                    <button type="submit"
+                                                            class="btn btn-danger"
+                                                            title="Eliminar usuario">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Información adicional -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="alert alert-info">
+            <h6><i class="bi bi-info-circle"></i> Información sobre Grupos y Permisos</h6>
+            <ul class="mb-0">
+                <li><strong>Auditores</strong>: Ver técnicos, crear informes de inspección, subir fotos con GPS, ver órdenes, descargar PDFs. No puede editar ni eliminar informes.</li>
+                <li><strong>Supervisores</strong>: Mismos accesos que Auditores — ver técnicos, crear informes, subir fotos con GPS, ver órdenes, descargar PDFs. No puede editar ni eliminar informes.</li>
+                <li><strong>Gerencia</strong>: Pueden editar y eliminar informes</li>
+                <li><strong>Staff</strong>: Tienen acceso al panel de administración de Django</li>
+                <li><strong>Superusuario</strong>: Control total del sistema (tú)</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

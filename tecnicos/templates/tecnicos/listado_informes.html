@@ -1,0 +1,117 @@
+<!-- Página de listado de informes generados -->
+{% extends 'tecnicos/base.html' %}
+
+{% block title %}Listado de Informes - Movistar{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="mb-3">Listado de Informes de Mejora</h1>
+
+        <!-- Filtros -->
+        <form method="get" class="mb-4">
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <select name="tecnico" class="form-select">
+                        <option value="">Todos los técnicos</option>
+                        {% for tec in tecnicos %}
+                            <option value="{{ tec.id }}" {% if tecnico_id == tec.id|stringformat:"s" %}selected{% endif %}>
+                                {{ tec.codigo }} - {{ tec.nombre }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="enviado" class="form-select">
+                        <option value="">Estado de envío</option>
+                        <option value="si" {% if enviado == 'si' %}selected{% endif %}>Enviado</option>
+                        <option value="no" {% if enviado == 'no' %}selected{% endif %}>No enviado</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                    <a href="{% url 'listado_informes' %}" class="btn btn-secondary">Limpiar</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de informes -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header card-header-movistar">
+                <h5 class="mb-0">Informes Generados</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if informes %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Orden</th>
+                                    <th>Técnico</th>
+                                    <th>Fecha Creación</th>
+                                    <th class="text-center">Email Enviado</th>
+                                    <th class="text-center">Fecha Envío</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for informe in informes %}
+                                    <tr>
+                                        <td><strong>{{ informe.orden_trabajo.numero_orden }}</strong></td>
+                                        <td>{{ informe.orden_trabajo.tecnico.nombre }}</td>
+                                        <td>{{ informe.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                                        <td class="text-center">
+                                            {% if informe.email_enviado %}
+                                                <span class="badge bg-success">Sí</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">No</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if informe.fecha_envio_email %}
+                                                {{ informe.fecha_envio_email|date:"d/m/Y H:i" }}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            {% if informe.archivo_pdf %}
+                                                <a href="{% url 'descargar_pdf' informe.id %}" class="btn btn-sm btn-primary">
+                                                    <i class="bi bi-download"></i> PDF
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted">Sin PDF</span>
+                                            {% endif %}
+
+                                            <!-- Botones solo para Gerencia -->
+                                            {% if user.groups.all.0.name == 'Gerencia' or user.is_superuser %}
+                                                <a href="{% url 'editar_informe' informe.id %}" class="btn btn-sm btn-warning" title="Editar informe">
+                                                    <i class="bi bi-pencil"></i> Editar
+                                                </a>
+                                                <form method="post" action="{% url 'eliminar_informe' informe.id %}" style="display: inline;" onsubmit="return confirm('¿Está seguro de eliminar este informe?');">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="Eliminar informe">
+                                                        <i class="bi bi-trash"></i> Eliminar
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="p-4 text-center text-muted">
+                        <p class="mb-0">No se encontraron informes con los filtros seleccionados.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

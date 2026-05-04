@@ -1,0 +1,89 @@
+{% extends 'tecnicos/base.html' %}
+
+{% block title %}Cambiar Contraseña - Movistar{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1><i class="bi bi-key"></i> Cambiar Contraseña</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'gestionar_usuarios' %}">Usuarios</a></li>
+                <li class="breadcrumb-item active">Cambiar Contraseña</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header card-header-movistar">
+                <h5 class="mb-0">Cambiar Contraseña de: {{ usuario.username }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Estás cambiando la contraseña de <strong>{{ usuario.first_name }} {{ usuario.last_name }}</strong>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="id_new_password1" class="form-label">{{ form.new_password1.label }} *</label>
+                        {{ form.new_password1 }}
+                        {% if form.new_password1.errors %}
+                            <div class="text-danger small mt-1">{{ form.new_password1.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_new_password2" class="form-label">{{ form.new_password2.label }} *</label>
+                        {{ form.new_password2 }}
+                        {% if form.new_password2.errors %}
+                            <div class="text-danger small mt-1">{{ form.new_password2.errors.0 }}</div>
+                        {% endif %}
+                        {% if form.non_field_errors %}
+                            <div class="text-danger small mt-1">{{ form.non_field_errors.0 }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save"></i> Cambiar Contraseña
+                        </button>
+                        <a href="{% url 'gestionar_usuarios' %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="bi bi-shield-check"></i> Seguridad</h6>
+            </div>
+            <div class="card-body">
+                <h6>Requisitos de Contraseña:</h6>
+                <ul class="small">
+                    <li>Mínimo 8 caracteres</li>
+                    <li>No puede ser muy similar al nombre de usuario</li>
+                    <li>No puede ser completamente numérica</li>
+                    <li>No puede ser una contraseña común</li>
+                </ul>
+
+                <hr>
+
+                <div class="alert alert-info small">
+                    <i class="bi bi-info-circle"></i>
+                    El usuario deberá usar esta nueva contraseña en su próximo inicio de sesión.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

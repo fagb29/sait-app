@@ -1,0 +1,87 @@
+<!-- Página de listado de infancias por agencia -->
+{% extends 'tecnicos/base.html' %}
+
+{% block title %}Infancias por Agencia - Movistar{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1 class="mb-3">Infancias por Agencia</h1>
+
+        <!-- Resumen de agencias -->
+        <div class="alert alert-info">
+            Total de agencias: <strong>{{ total_agencias }}</strong>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de agencias -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header card-header-movistar">
+                <h5 class="mb-0">Indicadores de Infancia por Agencia</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if agencias %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Agencia
+                                        <a href="?orden=nombre_asc" class="sort-btn" title="Ordenar A-Z">
+                                            <i class="bi bi-arrow-up{% if orden == 'nombre_asc' %}-circle-fill{% endif %}"></i>
+                                        </a>
+                                        <a href="?orden=nombre_desc" class="sort-btn" title="Ordenar Z-A">
+                                            <i class="bi bi-arrow-down{% if orden == 'nombre_desc' %}-circle-fill{% endif %}"></i>
+                                        </a>
+                                    </th>
+                                    <th class="text-center">Total Órdenes</th>
+                                    <th class="text-center">Total Infancias</th>
+                                    <th class="text-center">
+                                        % Infancia
+                                        <a href="?orden=infancia_asc" class="sort-btn" title="Ordenar de menor a mayor">
+                                            <i class="bi bi-arrow-up{% if orden == 'infancia_asc' %}-circle-fill{% endif %}"></i>
+                                        </a>
+                                        <a href="?orden=infancia_desc" class="sort-btn" title="Ordenar de mayor a menor">
+                                            <i class="bi bi-arrow-down{% if orden == 'infancia_desc' or not orden %}-circle-fill{% endif %}"></i>
+                                        </a>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for agencia in agencias %}
+                                    <tr>
+                                        <td><strong>{{ agencia.agencia }}</strong></td>
+                                        <td class="text-center">
+                                            <span class="badge bg-primary">{{ agencia.total_ordenes }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-danger">{{ agencia.total_infancias }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <!-- Barra de progreso para infancia -->
+                                            <div class="progress" style="height: 25px;">
+                                                <div class="progress-bar {% if agencia.porcentaje_infancia <= 5 %}bg-success{% elif agencia.porcentaje_infancia <= 10 %}bg-warning{% else %}bg-danger{% endif %}"
+                                                     role="progressbar"
+                                                     style="width: {{ agencia.porcentaje_infancia }}%;">
+                                                    {{ agencia.porcentaje_infancia }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="p-4 text-center text-muted">
+                        <p class="mb-0">No se encontraron agencias.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

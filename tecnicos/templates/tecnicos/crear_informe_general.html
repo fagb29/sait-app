@@ -1,0 +1,211 @@
+{% extends 'tecnicos/base.html' %}
+{% load static %}
+
+{% block title %}Crear Informe General - Movistar{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'listado_tecnicos' %}">Técnicos</a></li>
+                <li class="breadcrumb-item active">Crear Informe</li>
+            </ol>
+        </nav>
+
+        <h1>Crear Informe de Hallazgo</h1>
+        <p class="text-muted">Complete el formulario para generar un informe PDF que será enviado por correo electrónico</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header card-header-movistar">
+                <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Información del Informe</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" id="form-informe">
+                    {% csrf_token %}
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.numero_peticion.id_for_label }}" class="form-label fw-bold">
+                                {{ form.numero_peticion.label }}
+                            </label>
+                            {{ form.numero_peticion }}
+                            {% if form.numero_peticion.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.numero_peticion.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.tecnico.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-person-badge"></i> {{ form.tecnico.label }}
+                            </label>
+                            {{ form.tecnico }}
+                            {% if form.tecnico.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.tecnico.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.direccion.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-geo-alt"></i> {{ form.direccion.label }}
+                            </label>
+                            {{ form.direccion }}
+                            {% if form.direccion.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.direccion.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.comuna.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-building"></i> {{ form.comuna.label }}
+                            </label>
+                            {{ form.comuna }}
+                            {% if form.comuna.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.comuna.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.empresa.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-briefcase"></i> {{ form.empresa.label }}
+                            </label>
+                            {{ form.empresa }}
+                            {% if form.empresa.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.empresa.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.agencia.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-shop"></i> {{ form.agencia.label }}
+                            </label>
+                            {{ form.agencia }}
+                            {% if form.agencia.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.agencia.errors }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Campos ocultos de geolocalización -->
+                    <input type="hidden" id="foto_latitud" name="foto_latitud">
+                    <input type="hidden" id="foto_longitud" name="foto_longitud">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-camera-fill"></i> Evidencia Fotográfica
+                            <span class="badge bg-danger ms-1">Requiere cámara y GPS</span>
+                        </label>
+
+                        <div class="alert alert-info py-2 mb-2">
+                            <i class="bi bi-shield-check"></i>
+                            <strong>Validación anti-fraude activa:</strong>
+                            Las fotos deben tomarse directamente desde la cámara del dispositivo
+                            y se registrará la ubicación GPS en tiempo real.
+                            No se permiten fotos oscuras o negras.
+                        </div>
+
+                        {{ form.imagenes }}
+
+                        {% if form.imagenes.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.imagenes.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.comentarios.id_for_label }}" class="form-label fw-bold">
+                            <i class="bi bi-chat-text"></i> {{ form.comentarios.label }}
+                        </label>
+                        {{ form.comentarios }}
+                        {% if form.comentarios.errors %}
+                            <div class="invalid-feedback d-block">
+                                {{ form.comentarios.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label for="{{ form.creado_por.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-person-fill"></i> {{ form.creado_por.label }}
+                            </label>
+                            {{ form.creado_por }}
+                            {% if form.creado_por.errors %}
+                                <div class="invalid-feedback d-block">{{ form.creado_por.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <label for="{{ form.email_inspector.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-envelope-fill"></i> {{ form.email_inspector.label }}
+                            </label>
+                            {{ form.email_inspector }}
+                            <div class="form-text">
+                                <i class="bi bi-info-circle"></i> {{ form.email_inspector.help_text }}
+                            </div>
+                            {% if form.email_inspector.errors %}
+                                <div class="invalid-feedback d-block">{{ form.email_inspector.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-file-earmark-pdf"></i> Enviar y Crear Informe PDF
+                        </button>
+                        <a href="{% url 'listado_tecnicos' %}" class="btn btn-secondary btn-lg">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'tecnicos/js/camera_validator.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const inputImagenes = document.getElementById('id_imagenes');
+    if (inputImagenes) {
+        inputImagenes.setAttribute('multiple', 'multiple');
+        CameraValidator.init('id_imagenes', 'foto_latitud', 'foto_longitud');
+    }
+
+    // Validar antes de enviar que si hay imágenes haya GPS
+    document.getElementById('form-informe').addEventListener('submit', function (e) {
+        const lat = document.getElementById('foto_latitud').value;
+        const lng = document.getElementById('foto_longitud').value;
+        const input = document.getElementById('id_imagenes');
+        const tieneImagenes = input && input.files && input.files.length > 0;
+
+        if (tieneImagenes && (!lat || !lng)) {
+            e.preventDefault();
+            alert('ERROR: No se pudo verificar la ubicación GPS. Active el GPS y vuelva a tomar las fotos.');
+        }
+    });
+});
+</script>
+
+{% endblock %}

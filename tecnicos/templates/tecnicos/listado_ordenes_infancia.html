@@ -1,0 +1,186 @@
+<!-- Listado de órdenes con infancia -->
+{% extends 'tecnicos/base.html' %}
+
+{% block title %}Órdenes con Infancia - Movistar{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'listado_tecnicos' %}">Técnicos</a></li>
+                <li class="breadcrumb-item active">Órdenes con Infancia</li>
+            </ol>
+        </nav>
+
+        <h1>Órdenes con Infancia</h1>
+        <p class="text-muted">Listado de todas las órdenes de trabajo que presentan infancia</p>
+
+        <!-- Resumen -->
+        <div class="alert alert-info">
+            Total de órdenes con infancia: <strong>{{ total_ordenes }}</strong>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros y Tabla -->
+<div class="row">
+    <!-- Panel de Filtros -->
+    <div class="col-md-3">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header card-header-movistar">
+                <h6 class="mb-0"><i class="bi bi-funnel-fill"></i> Filtros</h6>
+            </div>
+            <div class="card-body">
+                <!-- Filtros activos -->
+                {% if tecnico_filtro or agencia_filtro or empresa_filtro or zona_filtro %}
+                <div class="mb-3">
+                    <h6 class="text-muted small">Filtros activos:</h6>
+                    {% if tecnico_filtro %}
+                        <span class="badge bg-primary mb-1 d-block text-start">Técnico seleccionado</span>
+                    {% endif %}
+                    {% if agencia_filtro %}
+                        <span class="badge bg-success mb-1 d-block text-start">Agencia: {{ agencia_filtro }}</span>
+                    {% endif %}
+                    {% if empresa_filtro %}
+                        <span class="badge bg-info mb-1 d-block text-start">Empresa: {{ empresa_filtro }}</span>
+                    {% endif %}
+                    {% if zona_filtro %}
+                        <span class="badge bg-warning text-dark mb-1 d-block text-start">Zona: {{ zona_filtro }}</span>
+                    {% endif %}
+                    <a href="{% url 'listado_ordenes_infancia' %}" class="btn btn-sm btn-danger w-100 mt-2">
+                        <i class="bi bi-x-circle"></i> Limpiar Filtros
+                    </a>
+                </div>
+                <hr>
+                {% endif %}
+
+                <!-- Filtro por Técnico -->
+                <div class="mb-3">
+                    <h6 class="fw-bold"><i class="bi bi-person"></i> Técnico</h6>
+                    <select class="form-select form-select-sm" id="filtroTecnico" onchange="aplicarFiltro('tecnico', this.value)">
+                        <option value="">Todos los técnicos</option>
+                        {% for tecnico in tecnicos %}
+                            <option value="{{ tecnico.id }}" {% if tecnico_filtro == tecnico.id|stringformat:"s" %}selected{% endif %}>{{ tecnico.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Filtro por Agencia -->
+                <div class="mb-3">
+                    <h6 class="fw-bold"><i class="bi bi-building"></i> Agencia</h6>
+                    <select class="form-select form-select-sm" id="filtroAgencia" onchange="aplicarFiltro('agencia', this.value)">
+                        <option value="">Todas las agencias</option>
+                        {% for agencia in agencias %}
+                            <option value="{{ agencia }}" {% if agencia_filtro == agencia %}selected{% endif %}>{{ agencia }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Filtro por Empresa -->
+                <div class="mb-3">
+                    <h6 class="fw-bold"><i class="bi bi-briefcase"></i> Empresa</h6>
+                    <select class="form-select form-select-sm" id="filtroEmpresa" onchange="aplicarFiltro('empresa', this.value)">
+                        <option value="">Todas las empresas</option>
+                        {% for empresa in empresas %}
+                            <option value="{{ empresa }}" {% if empresa_filtro == empresa %}selected{% endif %}>{{ empresa }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Filtro por Zona -->
+                <div class="mb-3">
+                    <h6 class="fw-bold"><i class="bi bi-geo-alt"></i> Zona</h6>
+                    <select class="form-select form-select-sm" id="filtroZona" onchange="aplicarFiltro('zona', this.value)">
+                        <option value="">Todas las zonas</option>
+                        {% for zona in zonas %}
+                            <option value="{{ zona }}" {% if zona_filtro == zona %}selected{% endif %}>{{ zona }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Órdenes -->
+    <div class="col-md-9">
+        <div class="card shadow-sm">
+            <div class="card-header card-header-movistar">
+                <h5 class="mb-0">Listado de Órdenes con Infancia</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if ordenes %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th>N° Orden</th>
+                                    <th>Técnico</th>
+                                    <th>Dirección</th>
+                                    <th class="text-center">Agencia</th>
+                                    <th class="text-center">Empresa</th>
+                                    <th class="text-center">Infancia</th>
+                                    <th class="text-center">Estado</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for orden in ordenes %}
+                                    <tr>
+                                        <td><strong>{{ orden.numero_orden }}</strong></td>
+                                        <td>{{ orden.tecnico.nombre }}</td>
+                                        <td>{{ orden.direccion|truncatewords:5 }}</td>
+                                        <td class="text-center">
+                                            <small>{{ orden.agencia|default:"-" }}</small>
+                                        </td>
+                                        <td class="text-center">
+                                            <small>{{ orden.empresa|default:"-" }}</small>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-danger">{{ orden.infancia }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            {% if orden.estado == 'COMPLETADA' %}
+                                                <span class="badge bg-success">Completada</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">Pendiente</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="{% url 'crear_informe' orden.id %}" class="btn btn-sm btn-success" title="Crear informe para esta orden">
+                                                <i class="bi bi-file-earmark-plus"></i> Informe
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="p-4 text-center text-muted">
+                        <p class="mb-0">No se encontraron órdenes con infancia{% if tecnico_filtro or agencia_filtro or empresa_filtro or zona_filtro %} con los filtros aplicados{% endif %}.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript para manejar los filtros -->
+<script>
+function aplicarFiltro(tipo, valor) {
+    // Obtener los parámetros actuales de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Actualizar o remover el parámetro según el valor
+    if (valor) {
+        urlParams.set(tipo, valor);
+    } else {
+        urlParams.delete(tipo);
+    }
+
+    // Redirigir con los nuevos parámetros
+    window.location.search = urlParams.toString();
+}
+</script>
+{% endblock %}

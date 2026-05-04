@@ -1,0 +1,1298 @@
+<!-- Template base para todas las páginas -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0033A0">
+    <title>{% block title %}Sistema de Gestión Movistar{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    {% load static %}
+    <!-- Google Fonts - Telefonica Sans Alternative -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <style>
+        /* ================================================
+           VARIABLES Y COLORES CORPORATIVOS MOVISTAR
+           ================================================ */
+        :root {
+            /* Colores primarios Movistar */
+            --movistar-azul: #0033A0;
+            --movistar-azul-hover: #002D8F;
+            --movistar-azul-claro: #E6F0FF;
+            --movistar-verde: #5CB615;
+            --movistar-verde-hover: #4FA512;
+            --movistar-verde-claro: #F0F9E8;
+
+            /* Paleta extendida */
+            --movistar-gris-oscuro: #313235;
+            --movistar-gris: #86888C;
+            --movistar-gris-claro: #F2F4F6;
+            --movistar-blanco: #FFFFFF;
+
+            /* Backgrounds */
+            --bg-principal: #F8F9FA;
+            --bg-secundario: #FFFFFF;
+            --bg-hover: #F2F4F6;
+
+            /* Textos */
+            --text-principal: #313235;
+            --text-secundario: #86888C;
+            --text-light: #FFFFFF;
+
+            /* Bordes y sombras */
+            --border-color: #E2E4E8;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+            /* Transiciones */
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.3s ease;
+            --transition-slow: 0.5s ease;
+        }
+
+        /* ================================================
+           ESTILOS GLOBALES
+           ================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background:
+                linear-gradient(135deg, rgba(0, 51, 160, 0.95) 0%, rgba(0, 65, 184, 0.92) 50%, rgba(92, 182, 21, 0.85) 100%),
+                url("{% static 'tecnicos/img/movistar-pattern.svg' %}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-principal);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            position: relative;
+        }
+
+        /* Capa de overlay adicional para mayor profundidad y dinamismo */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(92, 182, 21, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(0, 51, 160, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Asegurar que el contenido esté sobre el overlay */
+        .container, .container-fluid, nav, footer {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Tipografía mejorada */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            color: var(--text-principal);
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        h1 { font-size: 2.25rem; margin-bottom: 1.5rem; }
+        h2 { font-size: 1.875rem; margin-bottom: 1.25rem; }
+        h3 { font-size: 1.5rem; margin-bottom: 1rem; }
+        h4 { font-size: 1.25rem; margin-bottom: 0.875rem; }
+        h5 { font-size: 1.125rem; margin-bottom: 0.75rem; }
+
+        p {
+            margin-bottom: 1rem;
+            color: var(--text-secundario);
+        }
+
+        /* Responsive: En móviles, optimizar el fondo */
+        @media (max-width: 768px) {
+            body {
+                background-attachment: scroll;
+                /* En móviles mantener el patrón SVG pero con menos opacidad */
+                background-image:
+                    linear-gradient(135deg, rgba(0, 51, 160, 0.93) 0%, rgba(0, 65, 184, 0.90) 50%, rgba(92, 182, 21, 0.83) 100%),
+                    url("{% static 'tecnicos/img/movistar-pattern.svg' %}");
+            }
+        }
+
+        /* ================================================
+           NAVBAR CORPORATIVO MOVISTAR
+           ================================================ */
+        .navbar {
+            background: linear-gradient(135deg, var(--movistar-azul) 0%, var(--movistar-azul-hover) 100%) !important;
+            box-shadow: var(--shadow-lg);
+            padding: 1rem 0;
+            border-bottom: 3px solid var(--movistar-verde);
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: -0.02em;
+            transition: var(--transition-fast);
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-link {
+            font-weight: 500;
+            transition: var(--transition-fast);
+            position: relative;
+            padding: 0.5rem 1rem !important;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background-color: var(--movistar-verde);
+            transition: var(--transition-normal);
+        }
+
+        .nav-link:hover::after {
+            width: 80%;
+        }
+
+        .navbar-toggler {
+            border: 2px solid var(--movistar-blanco);
+            padding: 0.5rem 0.75rem;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 0.25rem rgba(255, 255, 255, 0.25);
+        }
+
+        /* ================================================
+           CONTAINER Y LAYOUT
+           ================================================ */
+        .container {
+            background-color: rgba(255, 255, 255, 0.96);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* ================================================
+           CARDS MODERNOS CON DISEÑO MOVISTAR - GLASSMORPHISM
+           ================================================ */
+        .card {
+            border: none;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow:
+                0 8px 32px 0 rgba(0, 51, 160, 0.12),
+                0 2px 8px 0 rgba(0, 0, 0, 0.05);
+            transition: all var(--transition-normal);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-left: 4px solid transparent;
+        }
+
+        .card:hover {
+            box-shadow:
+                0 12px 40px 0 rgba(0, 51, 160, 0.18),
+                0 4px 12px 0 rgba(0, 0, 0, 0.08);
+            transform: translateY(-6px);
+            border-left-color: var(--movistar-azul);
+            background: rgba(255, 255, 255, 0.98);
+        }
+
+        .card-header-movistar {
+            background: linear-gradient(135deg, var(--movistar-azul) 0%, var(--movistar-azul-hover) 100%);
+            color: var(--text-light);
+            border-radius: 12px 12px 0 0 !important;
+            font-weight: 600;
+            padding: 1.25rem 1.5rem;
+            font-size: 1.125rem;
+            letter-spacing: -0.01em;
+            border-bottom: 3px solid var(--movistar-verde);
+        }
+
+        .card-header-movistar h5,
+        .card-header-movistar h6 {
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* ================================================
+           TABLAS MODERNAS
+           ================================================ */
+        .table {
+            background-color: var(--movistar-blanco);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table thead {
+            background: linear-gradient(135deg, var(--movistar-gris-claro) 0%, #E8EAED 100%);
+            border-bottom: 2px solid var(--movistar-azul);
+        }
+
+        .table thead th {
+            color: var(--text-principal);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 1rem;
+            border: none;
+        }
+
+        .table tbody tr {
+            transition: all var(--transition-fast);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table tbody tr:hover {
+            background-color: var(--movistar-azul-claro);
+            transform: scale(1.001);
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border: none;
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(0, 51, 160, 0.02);
+        }
+
+        /* Botones de ordenamiento */
+        .sort-btn {
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--text-principal);
+            transition: var(--transition-fast);
+        }
+
+        .sort-btn:hover {
+            color: var(--movistar-azul);
+            transform: translateX(2px);
+        }
+
+        .sort-btn i {
+            font-size: 0.8em;
+            margin-left: 5px;
+            transition: var(--transition-fast);
+        }
+
+        /* ================================================
+           BOTONES CORPORATIVOS MOVISTAR
+           ================================================ */
+        .btn {
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 0.625rem 1.5rem;
+            transition: all var(--transition-normal);
+            border: none;
+            letter-spacing: 0.02em;
+            text-transform: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--movistar-azul) 0%, var(--movistar-azul-hover) 100%);
+            color: var(--text-light);
+            box-shadow: 0 4px 12px rgba(0, 51, 160, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--movistar-azul-hover) 0%, #001F6B 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 51, 160, 0.35);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--movistar-verde) 0%, var(--movistar-verde-hover) 100%);
+            color: var(--text-light);
+            box-shadow: 0 4px 12px rgba(92, 182, 21, 0.25);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, var(--movistar-verde-hover) 0%, #3F8B0E 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(92, 182, 21, 0.35);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #FFA726 0%, #FB8C00 100%);
+            color: var(--text-light);
+            box-shadow: 0 4px 12px rgba(255, 167, 38, 0.25);
+        }
+
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #FB8C00 0%, #E65100 100%);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #EF5350 0%, #E53935 100%);
+            color: var(--text-light);
+            box-shadow: 0 4px 12px rgba(239, 83, 80, 0.25);
+        }
+
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #E53935 0%, #C62828 100%);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--movistar-gris) 0%, #6F7175 100%);
+            color: var(--text-light);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #29B6F6 0%, #0288D1 100%);
+            color: var(--text-light);
+        }
+
+        .btn-sm {
+            padding: 0.375rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-group {
+            box-shadow: var(--shadow-sm);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        /* ================================================
+           BADGES Y ETIQUETAS
+           ================================================ */
+        .badge {
+            font-weight: 600;
+            padding: 0.5rem 0.875rem;
+            border-radius: 6px;
+            letter-spacing: 0.02em;
+            font-size: 0.75rem;
+        }
+
+        .badge-movistar {
+            background: linear-gradient(135deg, var(--movistar-azul) 0%, var(--movistar-azul-hover) 100%);
+            color: var(--text-light);
+        }
+
+        .bg-success {
+            background: linear-gradient(135deg, var(--movistar-verde) 0%, var(--movistar-verde-hover) 100%) !important;
+        }
+
+        .bg-primary {
+            background: linear-gradient(135deg, var(--movistar-azul) 0%, var(--movistar-azul-hover) 100%) !important;
+        }
+
+        .bg-info {
+            background: linear-gradient(135deg, #29B6F6 0%, #0288D1 100%) !important;
+        }
+
+        .bg-warning {
+            background: linear-gradient(135deg, #FFA726 0%, #FB8C00 100%) !important;
+        }
+
+        .bg-danger {
+            background: linear-gradient(135deg, #EF5350 0%, #E53935 100%) !important;
+        }
+
+        /* ================================================
+           ALERTAS MODERNAS
+           ================================================ */
+        .alert {
+            border-radius: 12px;
+            border: none;
+            border-left: 4px solid;
+            box-shadow: var(--shadow-sm);
+            padding: 1rem 1.25rem;
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background-color: var(--movistar-verde-claro);
+            border-left-color: var(--movistar-verde);
+            color: #2E7D0D;
+        }
+
+        .alert-info {
+            background-color: var(--movistar-azul-claro);
+            border-left-color: var(--movistar-azul);
+            color: #002D8F;
+        }
+
+        .alert-warning {
+            background-color: #FFF4E5;
+            border-left-color: #FB8C00;
+            color: #E65100;
+        }
+
+        .alert-danger {
+            background-color: #FFEBEE;
+            border-left-color: #E53935;
+            color: #C62828;
+        }
+
+        /* ================================================
+           FORMULARIOS MODERNOS
+           ================================================ */
+        .form-label {
+            font-weight: 600;
+            color: var(--text-principal);
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: all var(--transition-normal);
+            background-color: var(--movistar-blanco);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--movistar-azul);
+            box-shadow: 0 0 0 0.25rem rgba(0, 51, 160, 0.1);
+            background-color: var(--movistar-blanco);
+            transform: translateY(-1px);
+        }
+
+        .form-control::placeholder {
+            color: var(--movistar-gris);
+            font-style: italic;
+        }
+
+        .input-group {
+            box-shadow: var(--shadow-sm);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .input-group-text {
+            background-color: var(--movistar-gris-claro);
+            border: 2px solid var(--border-color);
+            color: var(--text-principal);
+            font-weight: 600;
+        }
+
+        /* Checkboxes y radios modernos */
+        .form-check-input {
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid var(--border-color);
+            transition: all var(--transition-fast);
+        }
+
+        .form-check-input:checked {
+            background-color: var(--movistar-azul);
+            border-color: var(--movistar-azul);
+        }
+
+        .form-check-label {
+            font-weight: 500;
+            margin-left: 0.5rem;
+        }
+
+        /* ================================================
+           BREADCRUMBS
+           ================================================ */
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0.75rem 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .breadcrumb-item {
+            font-weight: 500;
+        }
+
+        .breadcrumb-item.active {
+            color: var(--movistar-azul);
+            font-weight: 600;
+        }
+
+        .breadcrumb-item + .breadcrumb-item::before {
+            color: var(--movistar-gris);
+        }
+
+        /* ================================================
+           PROGRESS BARS
+           ================================================ */
+        .progress {
+            height: 1.5rem;
+            border-radius: 8px;
+            background-color: var(--movistar-gris-claro);
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--movistar-azul) 0%, var(--movistar-verde) 100%);
+            font-weight: 600;
+            transition: width 0.6s ease;
+        }
+
+        /* ================================================
+           DROPDOWNS
+           ================================================ */
+        .dropdown-menu {
+            border: none;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .dropdown-item {
+            border-radius: 8px;
+            padding: 0.625rem 1rem;
+            font-weight: 500;
+            transition: all var(--transition-fast);
+            margin-bottom: 0.25rem;
+        }
+
+        .dropdown-item:hover {
+            background-color: var(--movistar-azul-claro);
+            color: var(--movistar-azul);
+            transform: translateX(4px);
+        }
+
+        .dropdown-divider {
+            margin: 0.5rem 0;
+            border-color: var(--border-color);
+        }
+
+        /* ================================================
+           ANIMACIONES Y UTILIDADES
+           ================================================ */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease;
+        }
+
+        .shadow-movistar {
+            box-shadow: 0 4px 20px rgba(0, 51, 160, 0.15) !important;
+        }
+
+        .text-movistar-azul {
+            color: var(--movistar-azul) !important;
+        }
+
+        .text-movistar-verde {
+            color: var(--movistar-verde) !important;
+        }
+
+        .bg-movistar-azul {
+            background-color: var(--movistar-azul) !important;
+        }
+
+        .bg-movistar-verde {
+            background-color: var(--movistar-verde) !important;
+        }
+
+        /* ================================================
+           OFFCANVAS MÓVIL
+           ================================================ */
+        .offcanvas {
+            border: none;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .offcanvas-header {
+            border-bottom: 3px solid var(--movistar-verde);
+        }
+
+        .list-group-item {
+            border: none;
+            border-radius: 8px;
+            margin-bottom: 0.25rem;
+            transition: all var(--transition-fast);
+            font-weight: 500;
+        }
+
+        .list-group-item:hover {
+            background-color: var(--movistar-azul-claro);
+            transform: translateX(4px);
+        }
+
+        .list-group-item-action:active {
+            background-color: var(--movistar-azul);
+            color: var(--text-light);
+        }
+
+        /* Breadcrumbs */
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+
+        .breadcrumb-item.active {
+            color: var(--movistar-azul);
+        }
+
+        /* Progress bars */
+        .progress {
+            background-color: #e9ecef;
+            border-radius: 6px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Dropdowns mejorados */
+        .dropdown-menu {
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8f9fb;
+            color: var(--movistar-azul);
+        }
+
+        /* ============================================
+           ESTILOS RESPONSIVOS PARA MÓVILES
+           ============================================ */
+
+        /* Tablets y dispositivos medianos */
+        @media (max-width: 992px) {
+            .container {
+                padding: 20px;
+            }
+
+            .table {
+                font-size: 0.9rem;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Móviles (hasta 768px) */
+        @media (max-width: 768px) {
+            /* Container más compacto */
+            .container {
+                padding: 15px;
+                margin-top: 10px;
+            }
+
+            /* Navbar responsive */
+            .navbar-brand {
+                font-size: 1rem !important;
+            }
+
+            .navbar {
+                padding: 10px 15px;
+            }
+
+            /* Títulos más pequeños en móvil */
+            h1 {
+                font-size: 1.5rem;
+                margin-bottom: 15px;
+            }
+
+            h2 {
+                font-size: 1.3rem;
+            }
+
+            h3, h4 {
+                font-size: 1.1rem;
+            }
+
+            /* Cards más compactas */
+            .card {
+                margin-bottom: 15px;
+            }
+
+            .card-header-movistar {
+                padding: 12px 15px;
+                font-size: 0.95rem;
+            }
+
+            .card-body {
+                padding: 15px;
+            }
+
+            /* Tablas responsivas */
+            .table {
+                font-size: 0.85rem;
+            }
+
+            .table thead th {
+                padding: 8px 5px;
+                font-size: 0.8rem;
+            }
+
+            .table tbody td {
+                padding: 8px 5px;
+                font-size: 0.85rem;
+            }
+
+            /* Hacer tablas scrolleables horizontalmente */
+            .table-responsive {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* Botones más grandes y fáciles de tocar */
+            .btn {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+                margin-bottom: 8px;
+            }
+
+            .btn-sm {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+
+            /* Input y select más grandes para móvil */
+            .form-control, .form-select {
+                font-size: 16px; /* Previene zoom en iOS */
+                padding: 10px 12px;
+            }
+
+            /* Badges más pequeños */
+            .badge {
+                font-size: 0.75rem;
+                padding: 4px 8px;
+            }
+
+            /* Alerts más compactas */
+            .alert {
+                padding: 10px 12px;
+                font-size: 0.9rem;
+            }
+
+            /* Footer más compacto */
+            footer {
+                padding: 20px 0 !important;
+                font-size: 0.85rem;
+            }
+
+            /* Mejorar espaciado en formularios */
+            .mb-3 {
+                margin-bottom: 1rem !important;
+            }
+
+            /* Filtros y búsqueda en columna en móvil */
+            .row.mb-4 {
+                margin-bottom: 1rem !important;
+            }
+
+            .col-md-6, .col-md-4, .col-md-3 {
+                margin-bottom: 10px;
+            }
+        }
+
+        /* Móviles pequeños (hasta 576px) */
+        @media (max-width: 576px) {
+            /* Container full width con padding mínimo */
+            .container {
+                padding: 10px;
+                max-width: 100%;
+            }
+
+            /* Navbar brand muy compacta */
+            .navbar-brand {
+                font-size: 0.9rem !important;
+            }
+
+            /* Títulos aún más pequeños */
+            h1 {
+                font-size: 1.3rem;
+            }
+
+            h2 {
+                font-size: 1.15rem;
+            }
+
+            /* Tablas super compactas */
+            .table {
+                font-size: 0.75rem;
+            }
+
+            .table thead th,
+            .table tbody td {
+                padding: 6px 3px;
+                font-size: 0.75rem;
+            }
+
+            /* Botones full width en móvil pequeño */
+            .btn-block-mobile {
+                display: block;
+                width: 100%;
+            }
+
+            /* Ocultar columnas menos importantes en móvil */
+            .hide-mobile {
+                display: none;
+            }
+
+            /* Cards sin sombra para ahorrar espacio */
+            .card {
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+
+            /* Input groups en columna */
+            .input-group {
+                flex-direction: column;
+            }
+
+            .input-group > * {
+                width: 100% !important;
+                border-radius: 6px !important;
+                margin-bottom: 5px;
+            }
+
+            /* Dropdowns full width */
+            .dropdown-menu {
+                width: 100%;
+            }
+        }
+
+        /* Mejoras táctiles para dispositivos touch */
+        @media (hover: none) and (pointer: coarse) {
+            /* Áreas táctiles más grandes */
+            .btn, .nav-link, .dropdown-item {
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+            }
+
+            /* Eliminar hover effects en touch */
+            .card:hover {
+                transform: none;
+            }
+
+            /* Mejorar contraste para lectura móvil */
+            body {
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+        }
+
+        /* Orientación horizontal en móviles */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .navbar {
+                padding: 5px 10px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.3rem;
+            }
+        }
+
+        /* Utilidades responsive personalizadas */
+        .mobile-only {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-only {
+                display: block;
+            }
+
+            .desktop-only {
+                display: none;
+            }
+        }
+
+        /* Scroll suave para anclas */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Mejora de legibilidad en pantallas pequeñas */
+        @media (max-width: 768px) {
+            p, li, span {
+                line-height: 1.6;
+            }
+        }
+
+        /* ============================================
+           ESTILOS ESPECÍFICOS PARA VERSIÓN MÓVIL
+           ============================================ */
+
+        /* Cuando is_mobile está activo, aplicar estilos extra */
+        .mobile-view .container-fluid {
+            padding-left: 8px !important;
+            padding-right: 8px !important;
+        }
+
+        .mobile-view .card {
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-view .btn {
+            width: 100%;
+            margin-bottom: 10px;
+            font-weight: 600;
+            padding: 12px;
+            border-radius: 8px;
+        }
+
+        .mobile-view .table-responsive {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .mobile-view h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--movistar-azul);
+            margin-bottom: 15px;
+        }
+
+        .mobile-view h2 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--movistar-azul);
+        }
+
+        /* Offcanvas para menú móvil */
+        .offcanvas {
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .offcanvas .list-group-item {
+            border: none;
+            padding: 15px 20px;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .offcanvas .list-group-item:active {
+            background-color: #e3f2fd;
+            color: var(--movistar-azul);
+        }
+
+        .offcanvas .list-group-item i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+
+        /* Badges en móvil más grandes */
+        .mobile-view .badge {
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            font-weight: 600;
+        }
+
+        /* Inputs más grandes en móvil */
+        .mobile-view .form-control,
+        .mobile-view .form-select {
+            font-size: 16px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+        }
+
+        .mobile-view .form-control:focus,
+        .mobile-view .form-select:focus {
+            border-color: var(--movistar-azul);
+            box-shadow: 0 0 0 0.25rem rgba(0, 51, 160, 0.15);
+        }
+
+        /* Botones flotantes para acciones rápidas en móvil */
+        .mobile-fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Mejorar visibilidad de tabs en móvil */
+        .mobile-view .nav-tabs .nav-link {
+            font-size: 0.9rem;
+            padding: 10px 15px;
+        }
+
+        /* Swipe indicator para tablas en móvil */
+        .mobile-view .table-responsive::after {
+            content: "← Desliza →";
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            background: rgba(0, 51, 160, 0.8);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        /* Indicador de carga optimizado para móvil */
+        .mobile-view .spinner-border-sm {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% if is_mobile %}mobile-view{% else %}desktop-view{% endif %}">
+    {% if is_mobile %}
+    <!-- ============================================
+         VERSIÓN MÓVIL - Layout optimizado para celulares
+         ============================================ -->
+
+    <!-- Barra de navegación MÓVIL - Compacta y touch-friendly -->
+    <nav class="navbar navbar-dark" style="background-color: var(--movistar-azul) !important; padding: 12px 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'listado_tecnicos' %}" style="gap: 10px;">
+                <img src="{% static 'tecnicos/img/movistar-logo.svg' %}" alt="Movistar" height="35" class="d-inline-block align-text-top" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
+                <span style="font-size: 1.1rem; letter-spacing: 0.5px; color: white;">MOVISTAR</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" style="border: none; padding: 5px;">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Menú lateral móvil (Offcanvas) -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="mobileMenu" style="width: 280px;">
+        <div class="offcanvas-header" style="background-color: var(--movistar-azul); color: white;">
+            <h5 class="offcanvas-title"><i class="bi bi-list"></i> Menú</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body" style="padding: 0;">
+            <div class="list-group list-group-flush">
+                <a href="{% url 'listado_tecnicos' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-people"></i> Técnicos
+                </a>
+                <a href="{% url 'listado_informes' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-file-earmark-text"></i> Informes
+                </a>
+                <a href="{% url 'listado_ordenes_infancia' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-exclamation-triangle"></i> Órdenes con Infancia
+                </a>
+                <a href="{% url 'listado_por_agencia' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-building"></i> Por Agencia
+                </a>
+                <a href="{% url 'listado_por_zona' %}" class="list-group-item list-group-item-action">
+                    <i class="bi bi-geo-alt"></i> Por Zona
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="{% url 'crear_informe_accesible' %}" class="list-group-item list-group-item-action"
+                   style="background: linear-gradient(135deg, var(--movistar-verde) 0%, #4FA512 100%); color: white !important; font-weight: 600;">
+                    <i class="bi bi-universal-access-circle"></i> Modo Accesible (Inclusión)
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="?view=desktop" class="list-group-item list-group-item-action text-primary">
+                    <i class="bi bi-laptop"></i> Ver versión escritorio
+                </a>
+                <div class="dropdown-divider"></div>
+                {% if user.is_superuser %}
+                    <a href="{% url 'gestionar_usuarios' %}" class="list-group-item list-group-item-action text-success">
+                        <i class="bi bi-people-fill"></i> Gestionar Usuarios
+                    </a>
+                    <div class="dropdown-divider"></div>
+                {% endif %}
+                <a href="{% url 'logout' %}" class="list-group-item list-group-item-action text-danger">
+                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión ({{ user.username }})
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- ============================================
+         VERSIÓN ESCRITORIO - Layout tradicional
+         ============================================ -->
+
+    <!-- Barra de navegación ESCRITORIO -->
+    <nav class="navbar navbar-expand-lg navbar-dark mb-4" style="box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'listado_tecnicos' %}" style="gap: 15px;">
+                <img src="{% static 'tecnicos/img/movistar-logo.svg' %}" alt="Movistar" height="45" class="d-inline-block align-text-top" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));">
+                <div style="display: flex; flex-direction: column; line-height: 1.2;">
+                    <span style="font-size: 1.3rem; letter-spacing: 1px; color: white;">MOVISTAR</span>
+                    <span style="font-size: 0.75rem; font-weight: 400; color: var(--movistar-verde); letter-spacing: 0.5px;">Gestión de Técnicos</span>
+                </div>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'listado_tecnicos' %}">
+                            <i class="bi bi-people"></i> Técnicos
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-exclamation-triangle"></i> Infancias
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="{% url 'listado_ordenes_infancia' %}">Órdenes con Infancia</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'listado_por_agencia' %}">Por Agencia</a></li>
+                            <li><a class="dropdown-item" href="{% url 'listado_por_zona' %}">Por Zona</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'listado_informes' %}">
+                            <i class="bi bi-file-earmark-text"></i> Informes
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'crear_informe_accesible' %}"
+                           style="background: var(--movistar-verde); border-radius: 8px; padding: 8px 15px; color: white !important;"
+                           title="Modo inclusivo para personas con discapacidad visual">
+                            <i class="bi bi-universal-access-circle"></i> Modo Accesible
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-warning" href="?view=mobile">
+                            <i class="bi bi-phone"></i> Vista Móvil
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i> {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarUser">
+                            <li><span class="dropdown-item-text"><strong>{{ user.first_name }} {{ user.last_name }}</strong></span></li>
+                            <li><span class="dropdown-item-text small text-muted">{{ user.email }}</span></li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% if user.is_superuser %}
+                                <li><a class="dropdown-item" href="{% url 'gestionar_usuarios' %}"><i class="bi bi-people-fill"></i> Gestionar Usuarios</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                            {% endif %}
+                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> Cerrar Sesión</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <!-- Contenido principal -->
+    <div class="{% if is_mobile %}container-fluid px-2{% else %}container{% endif %}">
+        <!-- Mensajes de alerta -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show {% if is_mobile %}mx-2{% endif %}" role="alert">
+                    {% if is_mobile %}<small>{% endif %}
+                    {{ message }}
+                    {% if is_mobile %}</small>{% endif %}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Indicador de versión (solo visible en la parte superior) -->
+        {% if is_mobile %}
+        <div class="alert alert-info alert-dismissible fade show mx-2 d-flex align-items-center" style="font-size: 0.85rem; padding: 8px 12px;">
+            <i class="bi bi-phone me-2"></i>
+            <small>Vista móvil activa</small>
+            <a href="?view=desktop" class="btn btn-sm btn-outline-primary ms-auto" style="font-size: 0.75rem; padding: 4px 8px;">
+                <i class="bi bi-laptop"></i> Escritorio
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Contenido de las páginas específicas -->
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="{% if is_mobile %}mt-3 py-3{% else %}mt-5 py-4{% endif %}" style="background: linear-gradient(to right, #f8f9fa 0%, #e9ecef 100%); border-top: 3px solid var(--movistar-verde);">
+        <div class="container">
+            {% if is_mobile %}
+            <div class="text-center">
+                <img src="{% static 'tecnicos/img/movistar-logo.svg' %}" alt="Movistar" height="24" class="mb-2">
+                <p class="text-muted mb-0 small">
+                    &copy; 2025 Telefónica Movistar Chile
+                </p>
+            </div>
+            {% else %}
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <img src="{% static 'tecnicos/img/movistar-logo.svg' %}" alt="Movistar" height="35">
+                </div>
+                <div class="col-md-4 text-center">
+                    <p class="text-muted mb-0">
+                        Sistema de Gestión de Técnicos
+                    </p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <p class="text-muted mb-0">
+                        &copy; 2025 Telefónica Movistar Chile
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

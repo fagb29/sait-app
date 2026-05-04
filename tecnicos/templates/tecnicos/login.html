@@ -1,0 +1,351 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="theme-color" content="#0033A0">
+    <title>Login - Sistema Movistar</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+    <style>
+        :root {
+            --movistar-azul: #0033A0;
+            --movistar-verde: #5CB615;
+        }
+
+        body {
+            background:
+                linear-gradient(135deg, rgba(0, 51, 160, 0.95) 0%, rgba(0, 65, 184, 0.92) 50%, rgba(92, 182, 21, 0.85) 100%),
+                url("{% static 'tecnicos/img/movistar-pattern.svg' %}");
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+        }
+
+        /* Capa de overlay para mayor profundidad */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 30% 40%, rgba(92, 182, 21, 0.12) 0%, transparent 60%),
+                radial-gradient(circle at 70% 60%, rgba(0, 51, 160, 0.12) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Asegurar que el contenedor de login esté sobre el overlay */
+        .login-container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 450px;
+            padding: 15px;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.97);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 24px;
+            box-shadow:
+                0 12px 48px 0 rgba(0, 51, 160, 0.25),
+                0 4px 16px 0 rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, var(--movistar-azul) 0%, #00298a 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .login-header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .login-body {
+            padding: 40px 30px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            padding: 12px 15px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: var(--movistar-azul);
+            box-shadow: 0 0 0 0.2rem rgba(0, 51, 160, 0.15);
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, var(--movistar-azul) 0%, #00298a 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            width: 100%;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 51, 160, 0.3);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 51, 160, 0.4);
+            background: linear-gradient(135deg, #00298a 0%, var(--movistar-azul) 100%);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .alert {
+            border-radius: 10px;
+            border: none;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+        }
+
+        .usuarios-ejemplo {
+            background: #f8f9fb;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            border-left: 4px solid var(--movistar-verde);
+        }
+
+        .usuarios-ejemplo h6 {
+            color: var(--movistar-azul);
+            font-weight: 700;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+
+        .usuarios-ejemplo .usuario-item {
+            background: white;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .usuarios-ejemplo .usuario-item i {
+            color: var(--movistar-azul);
+            margin-right: 10px;
+            font-size: 1rem;
+        }
+
+        .usuarios-ejemplo .badge {
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            margin-left: auto;
+        }
+
+        @media (max-width: 576px) {
+            .login-header {
+                padding: 30px 20px;
+            }
+
+            .login-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .login-body {
+                padding: 30px 20px;
+            }
+
+            .usuarios-ejemplo {
+                padding: 15px;
+            }
+        }
+
+        .input-group-text {
+            background: #f8f9fb;
+            border: 2px solid #e0e6ed;
+            border-right: none;
+            border-radius: 10px 0 0 10px;
+            color: var(--movistar-azul);
+        }
+
+        .input-group .form-control {
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .input-group .form-control:focus {
+            border-left: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <img src="{% static 'tecnicos/img/movistar-logo.svg' %}" alt="Movistar" height="60" class="mb-3">
+                <h1 style="font-size: 1.4rem; margin-top: 10px;">Bienvenido</h1>
+                <p>Sistema de Gestión de Técnicos</p>
+            </div>
+
+            <div class="login-body">
+                <!-- Mensajes de error -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle"></i> {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <i class="bi bi-x-circle"></i> Usuario o contraseña incorrectos
+                    </div>
+                {% endif %}
+
+                <!-- Formulario de login -->
+                <form method="post" action="/login/">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="username" class="form-label">
+                            <i class="bi bi-person"></i> Usuario
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-person-fill"></i>
+                            </span>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="username"
+                                name="username"
+                                placeholder="Ingresa tu usuario"
+                                required
+                                autofocus
+                            >
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label">
+                            <i class="bi bi-key"></i> Contraseña
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-lock-fill"></i>
+                            </span>
+                            <input
+                                type="password"
+                                class="form-control"
+                                id="password"
+                                name="password"
+                                placeholder="Ingresa tu contraseña"
+                                required
+                            >
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-login">
+                        <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
+                    </button>
+                </form>
+
+                <!-- Usuarios de ejemplo -->
+                <div class="usuarios-ejemplo">
+                    <h6><i class="bi bi-info-circle"></i> USUARIOS DEL SISTEMA</h6>
+
+                    <div class="usuario-item">
+                        <i class="bi bi-clipboard-check"></i>
+                        <strong>auditores_movistar</strong>
+                        <span class="badge bg-primary">Auditores</span>
+                    </div>
+
+                    <div class="usuario-item">
+                        <i class="bi bi-people"></i>
+                        <strong>supervisores_movistar</strong>
+                        <span class="badge bg-success">Supervisores</span>
+                    </div>
+
+                    <div class="usuario-item">
+                        <i class="bi bi-briefcase"></i>
+                        <strong>gerencia_movistar</strong>
+                        <span class="badge bg-warning text-dark">Gerencia</span>
+                    </div>
+
+                    <div class="usuario-item">
+                        <i class="bi bi-gear"></i>
+                        <strong>admin</strong>
+                        <span class="badge bg-danger">Admin</span>
+                    </div>
+
+                    <small class="text-muted d-block mt-3" style="font-size: 0.75rem;">
+                        <i class="bi bi-shield-check"></i> Todas las contraseñas: [usuario]1234
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <p class="text-muted small">
+                &copy; 2025 Telefónica Movistar Chile
+            </p>
+            <p class="text-muted" style="font-size: 0.7rem;">
+                Sistema de Gestión Interna
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

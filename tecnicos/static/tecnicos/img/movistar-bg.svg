@@ -1,0 +1,38 @@
+<svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0033A0;stop-opacity:0.03" />
+      <stop offset="100%" style="stop-color:#5CB615;stop-opacity:0.02" />
+    </linearGradient>
+    <pattern id="movistar-pattern" x="0" y="0" width="200" height="200" patternUnits="userSpaceOnUse">
+      <circle cx="10" cy="10" r="2" fill="#0033A0" opacity="0.05"/>
+      <circle cx="60" cy="60" r="3" fill="#5CB615" opacity="0.04"/>
+      <circle cx="120" cy="30" r="2.5" fill="#0033A0" opacity="0.05"/>
+      <circle cx="170" cy="90" r="2" fill="#5CB615" opacity="0.04"/>
+      <circle cx="40" cy="150" r="2.5" fill="#0033A0" opacity="0.05"/>
+      <circle cx="140" cy="170" r="2" fill="#5CB615" opacity="0.04"/>
+    </pattern>
+  </defs>
+
+  <!-- Background gradient -->
+  <rect width="1920" height="1080" fill="url(#bg-gradient)"/>
+
+  <!-- Pattern overlay -->
+  <rect width="1920" height="1080" fill="url(#movistar-pattern)"/>
+
+  <!-- Movistar logo shapes (abstract) -->
+  <g opacity="0.03">
+    <circle cx="200" cy="150" r="80" fill="#0033A0"/>
+    <circle cx="1720" cy="930" r="100" fill="#5CB615"/>
+    <circle cx="960" cy="540" r="150" fill="#0033A0"/>
+    <circle cx="1600" cy="200" r="60" fill="#5CB615"/>
+    <circle cx="300" cy="880" r="70" fill="#0033A0"/>
+  </g>
+
+  <!-- Decorative lines -->
+  <g opacity="0.02" stroke="#0033A0" stroke-width="2" fill="none">
+    <path d="M 0,300 Q 480,250 960,300 T 1920,300"/>
+    <path d="M 0,600 Q 480,650 960,600 T 1920,600"/>
+    <path d="M 0,900 Q 480,850 960,900 T 1920,900"/>
+  </g>
+</svg>

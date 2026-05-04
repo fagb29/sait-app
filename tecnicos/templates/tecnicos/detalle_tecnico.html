@@ -1,0 +1,212 @@
+<!-- Página de detalle de técnico con sus órdenes de trabajo -->
+{% extends 'tecnicos/base.html' %}
+
+{% block title %}{{ tecnico.nombre }} - Movistar{% endblock %}
+
+{% block content %}
+<!-- Información del técnico -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'listado_tecnicos' %}">Técnicos</a></li>
+                <li class="breadcrumb-item active">{{ tecnico.nombre }}</li>
+            </ol>
+        </nav>
+
+        <h1>{{ tecnico.nombre }}</h1>
+        <p class="text-muted">Código: {{ tecnico.codigo }}</p>
+    </div>
+</div>
+
+<!-- Tarjetas de indicadores -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Completadas</h5>
+                <h2 class="text-success">{{ tecnico.ordenes_completadas }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Pendientes</h5>
+                <h2 class="text-warning">{{ tecnico.ordenes_pendientes }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title text-muted">% Cumplimiento</h5>
+                <h2 class="text-primary">{{ tecnico.porcentaje_cumplimiento }}%</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title text-muted">Calificación</h5>
+                <h2 class="text-info">{{ tecnico.calificacion_promedio }}/5.0</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros de órdenes con botones en encabezado -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header card-header-movistar d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Órdenes de Trabajo ({{ total_ordenes }})</h5>
+                <div class="btn-group" role="group">
+                    <!-- Botón Estado -->
+                    <div class="dropdown me-2">
+                        <button class="btn btn-warning dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-funnel"></i> Estado
+                            {% if estado_filtro %}<span class="badge bg-danger ms-1">1</span>{% endif %}
+                        </button>
+                        <ul class="dropdown-menu" style="min-width: 250px;">
+                            <li><h6 class="dropdown-header">Filtrar por Estado</h6></li>
+                            <li><a class="dropdown-item" href="?{% if agencia_filtro %}agencia={{ agencia_filtro }}&{% endif %}{% if empresa_filtro %}empresa={{ empresa_filtro }}&{% endif %}{% if zona_filtro %}zona={{ zona_filtro }}{% endif %}">Todos los estados</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item {% if estado_filtro == 'PENDIENTE' %}active{% endif %}" href="?estado=PENDIENTE{% if agencia_filtro %}&agencia={{ agencia_filtro }}{% endif %}{% if empresa_filtro %}&empresa={{ empresa_filtro }}{% endif %}{% if zona_filtro %}&zona={{ zona_filtro }}{% endif %}">Pendiente</a></li>
+                            <li><a class="dropdown-item {% if estado_filtro == 'EN_PROCESO' %}active{% endif %}" href="?estado=EN_PROCESO{% if agencia_filtro %}&agencia={{ agencia_filtro }}{% endif %}{% if empresa_filtro %}&empresa={{ empresa_filtro }}{% endif %}{% if zona_filtro %}&zona={{ zona_filtro }}{% endif %}">En Proceso</a></li>
+                            <li><a class="dropdown-item {% if estado_filtro == 'COMPLETADA' %}active{% endif %}" href="?estado=COMPLETADA{% if agencia_filtro %}&agencia={{ agencia_filtro }}{% endif %}{% if empresa_filtro %}&empresa={{ empresa_filtro }}{% endif %}{% if zona_filtro %}&zona={{ zona_filtro }}{% endif %}">Completada</a></li>
+                            <li><a class="dropdown-item {% if estado_filtro == 'CANCELADA' %}active{% endif %}" href="?estado=CANCELADA{% if agencia_filtro %}&agencia={{ agencia_filtro }}{% endif %}{% if empresa_filtro %}&empresa={{ empresa_filtro }}{% endif %}{% if zona_filtro %}&zona={{ zona_filtro }}{% endif %}">Cancelada</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Botón Agencia -->
+                    <div class="dropdown me-2">
+                        <button class="btn btn-warning dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-building"></i> Agencia
+                            {% if agencia_filtro %}<span class="badge bg-danger ms-1">1</span>{% endif %}
+                        </button>
+                        <ul class="dropdown-menu" style="max-height: 400px; overflow-y: auto; min-width: 300px;">
+                            <li><h6 class="dropdown-header">Filtrar por Agencia</h6></li>
+                            <li><a class="dropdown-item" href="?{% if estado_filtro %}estado={{ estado_filtro }}&{% endif %}{% if empresa_filtro %}empresa={{ empresa_filtro }}&{% endif %}{% if zona_filtro %}zona={{ zona_filtro }}{% endif %}">Todas las agencias</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% for agencia in agencias %}
+                                <li><a class="dropdown-item {% if agencia_filtro == agencia %}active{% endif %}" href="?agencia={{ agencia|urlencode }}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if empresa_filtro %}&empresa={{ empresa_filtro }}{% endif %}{% if zona_filtro %}&zona={{ zona_filtro }}{% endif %}">{{ agencia }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- Botón Empresa -->
+                    <div class="dropdown me-2">
+                        <button class="btn btn-warning dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-briefcase"></i> Empresa
+                            {% if empresa_filtro %}<span class="badge bg-danger ms-1">1</span>{% endif %}
+                        </button>
+                        <ul class="dropdown-menu" style="max-height: 400px; overflow-y: auto; min-width: 250px;">
+                            <li><h6 class="dropdown-header">Filtrar por Empresa</h6></li>
+                            <li><a class="dropdown-item" href="?{% if estado_filtro %}estado={{ estado_filtro }}&{% endif %}{% if agencia_filtro %}agencia={{ agencia_filtro }}&{% endif %}{% if zona_filtro %}zona={{ zona_filtro }}{% endif %}">Todas las empresas</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% for empresa in empresas %}
+                                <li><a class="dropdown-item {% if empresa_filtro == empresa %}active{% endif %}" href="?empresa={{ empresa|urlencode }}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if agencia_filtro %}&agencia={{ agencia_filtro }}{% endif %}{% if zona_filtro %}&zona={{ zona_filtro }}{% endif %}">{{ empresa }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- Botón Zona -->
+                    <div class="dropdown me-2">
+                        <button class="btn btn-warning dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-geo-alt"></i> Zona
+                            {% if zona_filtro %}<span class="badge bg-danger ms-1">1</span>{% endif %}
+                        </button>
+                        <ul class="dropdown-menu" style="min-width: 200px;">
+                            <li><h6 class="dropdown-header">Filtrar por Zona</h6></li>
+                            <li><a class="dropdown-item" href="?{% if estado_filtro %}estado={{ estado_filtro }}&{% endif %}{% if agencia_filtro %}agencia={{ agencia_filtro }}&{% endif %}{% if empresa_filtro %}empresa={{ empresa_filtro }}{% endif %}">Todas las zonas</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% for zona in zonas %}
+                                <li><a class="dropdown-item {% if zona_filtro == zona %}active{% endif %}" href="?zona={{ zona|urlencode }}{% if estado_filtro %}&estado={{ estado_filtro }}{% endif %}{% if agencia_filtro %}&agencia={{ agencia_filtro }}{% endif %}{% if empresa_filtro %}&empresa={{ empresa_filtro }}{% endif %}">{{ zona }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- Botón Limpiar -->
+                    {% if estado_filtro or agencia_filtro or empresa_filtro or zona_filtro %}
+                        <a href="{% url 'detalle_tecnico' tecnico.id %}" class="btn btn-light">
+                            <i class="bi bi-x-circle"></i> Limpiar
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Filtros activos -->
+            {% if estado_filtro or agencia_filtro or empresa_filtro or zona_filtro %}
+            <div class="card-body bg-light py-2">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <strong>Filtros activos:</strong>
+                    {% if estado_filtro %}
+                        <span class="badge bg-primary">Estado: {{ estado_filtro }}</span>
+                    {% endif %}
+                    {% if agencia_filtro %}
+                        <span class="badge bg-success">Agencia: {{ agencia_filtro }}</span>
+                    {% endif %}
+                    {% if empresa_filtro %}
+                        <span class="badge bg-info">Empresa: {{ empresa_filtro }}</span>
+                    {% endif %}
+                    {% if zona_filtro %}
+                        <span class="badge bg-warning text-dark">Zona: {{ zona_filtro }}</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Tabla de órdenes -->
+            <div class="card-body p-0">
+                {% if ordenes %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Número</th>
+                                    <th>Descripción</th>
+                                    <th>Dirección</th>
+                                    <th class="text-center">Estado</th>
+                                    <th class="text-center">Fecha Asignación</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for orden in ordenes %}
+                                    <tr>
+                                        <td><strong>{{ orden.numero_orden }}</strong></td>
+                                        <td>{{ orden.descripcion|truncatewords:10 }}</td>
+                                        <td>{{ orden.direccion|truncatewords:8 }}</td>
+                                        <td class="text-center">
+                                            {% if orden.estado == 'COMPLETADA' %}
+                                                <span class="badge bg-success">Completada</span>
+                                            {% elif orden.estado == 'EN_PROCESO' %}
+                                                <span class="badge bg-info">En Proceso</span>
+                                            {% elif orden.estado == 'CANCELADA' %}
+                                                <span class="badge bg-danger">Cancelada</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">Pendiente</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-center">{{ orden.fecha_asignacion|date:"d/m/Y H:i" }}</td>
+                                        <td class="text-center">
+                                            <a href="{% url 'crear_informe' orden.id %}" class="btn btn-sm btn-success">
+                                                Crear Informe
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="p-4 text-center text-muted">
+                        <p class="mb-0">No hay órdenes de trabajo{% if estado_filtro %} con el estado seleccionado{% endif %}.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

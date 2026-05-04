@@ -1,0 +1,175 @@
+{% extends 'tecnicos/base.html' %}
+
+{% block title %}{{ accion }} Usuario - Movistar{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h1><i class="bi bi-person-{{ accion == 'Crear' and 'plus' or 'gear' }}"></i> {{ accion}} Usuario</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'gestionar_usuarios' %}">Usuarios</a></li>
+                <li class="breadcrumb-item active">{{ accion }}</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header card-header-movistar">
+                <h5 class="mb-0">Información del Usuario</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Información básica -->
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="id_username" class="form-label">{{ form.username.label }} *</label>
+                            {{ form.username }}
+                            {% if form.username.errors %}
+                                <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+                            {% endif %}
+                            <div class="form-text">{{ form.username.help_text }}</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_first_name" class="form-label">{{ form.first_name.label }} *</label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                                <div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_last_name" class="form-label">{{ form.last_name.label }} *</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                                <div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="id_email" class="form-label">{{ form.email.label }} *</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Contraseñas (solo al crear) -->
+                    {% if accion == 'Crear' %}
+                        <hr>
+                        <h6 class="mb-3">Contraseña</h6>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_password1" class="form-label">{{ form.password1.label }} *</label>
+                                {{ form.password1 }}
+                                {% if form.password1.errors %}
+                                    <div class="text-danger small mt-1">{{ form.password1.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_password2" class="form-label">{{ form.password2.label }} *</label>
+                                {{ form.password2 }}
+                                {% if form.password2.errors %}
+                                    <div class="text-danger small mt-1">{{ form.password2.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Permisos y grupos -->
+                    <hr>
+                    <h6 class="mb-3">Permisos y Grupos</h6>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label">{{ form.groups.label }}</label>
+                            {{ form.groups }}
+                            {% if form.groups.errors %}
+                                <div class="text-danger small mt-1">{{ form.groups.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check">
+                                {{ form.is_staff }}
+                                <label class="form-check-label" for="id_is_staff">
+                                    {{ form.is_staff.label }}
+                                </label>
+                                <div class="form-text">{{ form.is_staff.help_text }}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check">
+                                {{ form.is_active }}
+                                <label class="form-check-label" for="id_is_active">
+                                    {{ form.is_active.label }}
+                                </label>
+                                <div class="form-text">{{ form.is_active.help_text }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> Guardar Usuario
+                            </button>
+                            <a href="{% url 'gestionar_usuarios' %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel de ayuda -->
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Ayuda</h6>
+            </div>
+            <div class="card-body">
+                <h6>Grupos Disponibles:</h6>
+                <ul class="small">
+                    <li><strong>Auditores</strong>: Ver técnicos, crear informes, subir fotos con GPS, ver órdenes, descargar PDFs. Sin editar/eliminar.</li>
+                    <li><strong>Supervisores</strong>: Mismos accesos que Auditores.</li>
+                    <li><strong>Gerencia</strong>: Editar y eliminar informes</li>
+                </ul>
+
+                <hr>
+
+                <h6>Permisos:</h6>
+                <ul class="small">
+                    <li><strong>Staff</strong>: Acceso al admin de Django</li>
+                    <li><strong>Activo</strong>: Usuario puede iniciar sesión</li>
+                </ul>
+
+                <hr>
+
+                <h6>Recomendaciones:</h6>
+                <ul class="small">
+                    <li>Use un nombre de usuario descriptivo</li>
+                    <li>Asigne al menos un grupo</li>
+                    <li>Complete el correo electrónico</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

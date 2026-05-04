@@ -1,0 +1,598 @@
+{% extends 'tecnicos/base.html' %}
+
+{% block title %}Crear Informe Accesible - Modo Inclusivo{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'listado_tecnicos' %}">Técnicos</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Crear Informe - Modo Accesible</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h1 id="titulo-principal" tabindex="0">
+                    <i class="bi bi-universal-access-circle text-primary"></i>
+                    Crear Informe - Modo Inclusivo
+                </h1>
+                <p class="text-muted" tabindex="0">Sistema adaptado para personas con discapacidad visual</p>
+            </div>
+            <div>
+                <button type="button" class="btn btn-outline-primary" id="btnAyuda" aria-label="Ayuda de accesibilidad">
+                    <i class="bi bi-question-circle"></i> Ayuda
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Panel de Control de Accesibilidad -->
+<div class="card mb-4" style="border: 3px solid var(--movistar-verde);">
+    <div class="card-header" style="background: linear-gradient(135deg, var(--movistar-verde) 0%, #4FA512 100%); color: white;">
+        <h5 class="mb-0">
+            <i class="bi bi-gear-fill"></i> Panel de Accesibilidad
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <!-- Tamaño de Texto -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">
+                    <i class="bi bi-fonts"></i> Tamaño de Texto
+                </label>
+                <div class="btn-group w-100" role="group" aria-label="Controles de tamaño de texto">
+                    <button type="button" class="btn btn-outline-secondary" id="btnTextoMenos" aria-label="Reducir tamaño de texto">
+                        <i class="bi bi-dash-circle"></i> A-
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="btnTextoNormal" aria-label="Tamaño de texto normal">
+                        Normal
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="btnTextoMas" aria-label="Aumentar tamaño de texto">
+                        <i class="bi bi-plus-circle"></i> A+
+                    </button>
+                </div>
+            </div>
+
+            <!-- Contraste -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">
+                    <i class="bi bi-circle-half"></i> Contraste
+                </label>
+                <div class="d-grid">
+                    <button type="button" class="btn btn-outline-dark" id="btnContraste" aria-label="Alternar modo de alto contraste">
+                        <i class="bi bi-brightness-high"></i> Alto Contraste
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Indicador de grabación -->
+        <div id="indicadorGrabacion" class="alert alert-success d-none mt-3" role="status" aria-live="assertive">
+            <div class="d-flex align-items-center">
+                <div class="spinner-grow text-success me-3" role="status">
+                    <span class="visually-hidden">Grabando...</span>
+                </div>
+                <div>
+                    <strong>🎤 Escuchando...</strong>
+                    <p class="mb-0">Hable claramente. Su voz será transcrita automáticamente.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario de Informe -->
+<div class="card shadow-sm">
+    <div class="card-header card-header-movistar">
+        <h5 class="mb-0">Datos del Informe</h5>
+    </div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data" id="informeForm" aria-label="Formulario de creación de informe">
+            {% csrf_token %}
+
+            <!-- Técnico -->
+            <div class="mb-4">
+                <label for="{{ form.tecnico.id_for_label }}" class="form-label fw-bold" style="font-size: 1.1rem;">
+                    <i class="bi bi-person-badge"></i> {{ form.tecnico.label }}
+                    <span class="text-danger" aria-label="Campo obligatorio">*</span>
+                </label>
+                <div class="input-group">
+                    {{ form.tecnico }}
+                    <button class="btn btn-success" type="button" data-campo="tecnico"
+                            aria-label="Dictar nombre del técnico por voz"
+                            title="Haga click para dictar el nombre del técnico">
+                        <i class="bi bi-mic-fill"></i>
+                    </button>
+                </div>
+                <div class="form-text" id="ayuda-tecnico">
+                    Nombre completo del técnico responsable. Puede usar el botón de micrófono para dictar.
+                </div>
+                <div class="transcripcion-temp d-none mt-2" data-campo="tecnico" aria-live="polite"></div>
+            </div>
+
+            <!-- Fecha -->
+            <div class="mb-4">
+                <label for="{{ form.fecha.id_for_label }}" class="form-label fw-bold" style="font-size: 1.1rem;">
+                    <i class="bi bi-calendar-event"></i> {{ form.fecha.label }}
+                    <span class="text-danger" aria-label="Campo obligatorio">*</span>
+                </label>
+                {{ form.fecha }}
+                <div class="form-text" id="ayuda-fecha">
+                    Fecha en que se detectó el hallazgo.
+                </div>
+            </div>
+
+            <!-- Agencia -->
+            <div class="mb-4">
+                <label for="{{ form.agencia.id_for_label }}" class="form-label fw-bold" style="font-size: 1.1rem;">
+                    <i class="bi bi-building"></i> {{ form.agencia.label }}
+                    <span class="text-danger" aria-label="Campo obligatorio">*</span>
+                </label>
+                <div class="input-group">
+                    {{ form.agencia }}
+                    <button class="btn btn-success" type="button" data-campo="agencia"
+                            aria-label="Dictar nombre de la agencia por voz">
+                        <i class="bi bi-mic-fill"></i>
+                    </button>
+                </div>
+                <div class="form-text" id="ayuda-agencia">
+                    Nombre de la agencia donde ocurrió el hallazgo.
+                </div>
+                <div class="transcripcion-temp d-none mt-2" data-campo="agencia" aria-live="polite"></div>
+            </div>
+
+            <!-- Zona -->
+            <div class="mb-4">
+                <label for="{{ form.zona.id_for_label }}" class="form-label fw-bold" style="font-size: 1.1rem;">
+                    <i class="bi bi-geo-alt"></i> {{ form.zona.label }}
+                    <span class="text-danger" aria-label="Campo obligatorio">*</span>
+                </label>
+                {{ form.zona }}
+                <div class="form-text" id="ayuda-zona">
+                    Zona geográfica. Use las flechas del teclado para seleccionar.
+                </div>
+            </div>
+
+            <!-- Tipo de Hallazgo -->
+            <div class="mb-4">
+                <label for="{{ form.tipo_hallazgo.id_for_label }}" class="form-label fw-bold" style="font-size: 1.1rem;">
+                    <i class="bi bi-exclamation-triangle"></i> {{ form.tipo_hallazgo.label }}
+                    <span class="text-danger" aria-label="Campo obligatorio">*</span>
+                </label>
+                {{ form.tipo_hallazgo }}
+                <div class="form-text" id="ayuda-tipo">
+                    Categoría del hallazgo encontrado.
+                </div>
+            </div>
+
+            <!-- Descripción (con dictado por voz) -->
+            <div class="mb-4">
+                <label for="{{ form.descripcion.id_for_label }}" class="form-label fw-bold" style="font-size: 1.1rem;">
+                    <i class="bi bi-file-text"></i> {{ form.descripcion.label }}
+                    <span class="text-danger" aria-label="Campo obligatorio">*</span>
+                </label>
+                <div class="input-group">
+                    {{ form.descripcion }}
+                    <button class="btn btn-success" type="button" data-campo="descripcion"
+                            aria-label="Dictar descripción por voz"
+                            title="Haga click para dictar la descripción">
+                        <i class="bi bi-mic-fill"></i>
+                    </button>
+                </div>
+                <div class="form-text" id="ayuda-descripcion">
+                    Describa detalladamente el hallazgo. Puede usar el botón de micrófono para dictar.
+                </div>
+                <div class="transcripcion-temp d-none mt-2" data-campo="descripcion" aria-live="polite"></div>
+            </div>
+
+            <!-- Dirección -->
+            <div class="mb-4">
+                <label for="{{ form.direccion.id_for_label }}" class="form-label fw-bold" style="font-size: 1.1rem;">
+                    <i class="bi bi-pin-map"></i> {{ form.direccion.label }}
+                    <span class="text-danger" aria-label="Campo obligatorio">*</span>
+                </label>
+                <div class="input-group">
+                    {{ form.direccion }}
+                    <button class="btn btn-success" type="button" data-campo="direccion"
+                            aria-label="Dictar dirección por voz">
+                        <i class="bi bi-mic-fill"></i>
+                    </button>
+                </div>
+                <div class="form-text" id="ayuda-direccion">
+                    Dirección completa donde se detectó el hallazgo.
+                </div>
+                <div class="transcripcion-temp d-none mt-2" data-campo="direccion" aria-live="polite"></div>
+            </div>
+
+            <!-- Comuna -->
+            <div class="mb-4">
+                <label for="{{ form.comuna.id_for_label }}" class="form-label fw-bold" style="font-size: 1.1rem;">
+                    <i class="bi bi-geo"></i> {{ form.comuna.label }}
+                    <span class="text-danger" aria-label="Campo obligatorio">*</span>
+                </label>
+                <div class="input-group">
+                    {{ form.comuna }}
+                    <button class="btn btn-success" type="button" data-campo="comuna"
+                            aria-label="Dictar comuna por voz">
+                        <i class="bi bi-mic-fill"></i>
+                    </button>
+                </div>
+                <div class="form-text" id="ayuda-comuna">
+                    Comuna donde se ubica.
+                </div>
+                <div class="transcripcion-temp d-none mt-2" data-campo="comuna" aria-live="polite"></div>
+            </div>
+
+            <!-- Comentarios -->
+            <div class="mb-4">
+                <label for="{{ form.comentarios.id_for_label }}" class="form-label fw-bold" style="font-size: 1.1rem;">
+                    <i class="bi bi-chat-left-text"></i> {{ form.comentarios.label}}
+                </label>
+                <div class="input-group">
+                    {{ form.comentarios }}
+                    <button class="btn btn-success" type="button" data-campo="comentarios"
+                            aria-label="Dictar comentarios por voz">
+                        <i class="bi bi-mic-fill"></i>
+                    </button>
+                </div>
+                <div class="form-text" id="ayuda-comentarios">
+                    Información adicional relevante (opcional).
+                </div>
+                <div class="transcripcion-temp d-none mt-2" data-campo="comentarios" aria-live="polite"></div>
+            </div>
+
+            <!-- Evidencia Fotográfica -->
+            <div class="mb-4">
+                <label for="{{ form.imagenes.id_for_label }}" class="form-label fw-bold" style="font-size: 1.1rem;">
+                    <i class="bi bi-camera-fill"></i> {{ form.imagenes.label }}
+                </label>
+                {{ form.imagenes }}
+                <div class="form-text" id="ayuda-imagenes">
+                    <i class="bi bi-info-circle"></i> Puede seleccionar hasta 20 imágenes (JPG, PNG, GIF).
+                    Mantenga presionado Ctrl (Windows) o Cmd (Mac) para seleccionar múltiples archivos.
+                    <br>
+                    <strong>Tamaño recomendado:</strong> Máximo 5MB por imagen.
+                </div>
+                <div id="preview-imagenes" class="mt-3 d-none">
+                    <p class="text-success">
+                        <i class="bi bi-check-circle"></i>
+                        <span id="contador-imagenes">0</span> imagen(es) seleccionada(s)
+                    </p>
+                </div>
+            </div>
+
+            <!-- Creado por -->
+            <div class="mb-4">
+                <label for="{{ form.creado_por.id_for_label }}" class="form-label fw-bold" style="font-size: 1.1rem;">
+                    <i class="bi bi-person-check"></i> {{ form.creado_por.label }}
+                    <span class="text-danger" aria-label="Campo obligatorio">*</span>
+                </label>
+                <div class="input-group">
+                    {{ form.creado_por }}
+                    <button class="btn btn-success" type="button" data-campo="creado_por"
+                            aria-label="Dictar su nombre por voz">
+                        <i class="bi bi-mic-fill"></i>
+                    </button>
+                </div>
+                <div class="form-text" id="ayuda-creado-por">
+                    Su nombre completo.
+                </div>
+                <div class="transcripcion-temp d-none mt-2" data-campo="creado_por" aria-live="polite"></div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="d-grid gap-3 d-md-flex justify-content-md-between">
+                <a href="{% url 'listado_tecnicos' %}" class="btn btn-secondary btn-lg" aria-label="Cancelar y volver al listado">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-lg"
+                        style="background: var(--movistar-verde); color: white;"
+                        aria-label="Guardar informe y generar PDF">
+                    <i class="bi bi-save"></i> Guardar y Generar PDF
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Ayuda -->
+<div class="modal fade" id="modalAyuda" tabindex="-1" aria-labelledby="modalAyudaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: var(--movistar-azul); color: white;">
+                <h5 class="modal-title" id="modalAyudaLabel">
+                    <i class="bi bi-info-circle"></i> Guía de Accesibilidad
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <h6><i class="bi bi-keyboard"></i> Navegación por Teclado</h6>
+                <ul>
+                    <li><kbd>Tab</kbd> - Navegar al siguiente campo</li>
+                    <li><kbd>Shift + Tab</kbd> - Navegar al campo anterior</li>
+                    <li><kbd>Enter</kbd> - Activar botón o enlace</li>
+                    <li><kbd>Espacio</kbd> - Seleccionar checkbox o radio button</li>
+                    <li><kbd>↑ ↓</kbd> - Navegar en listas desplegables</li>
+                </ul>
+
+                <h6 class="mt-4"><i class="bi bi-mic"></i> Dictado por Voz</h6>
+                <ul>
+                    <li>Click en el botón verde de micrófono <i class="bi bi-mic-fill text-success"></i> junto a cada campo de texto</li>
+                    <li>Hable claramente y pausadamente</li>
+                    <li>El sistema transcribirá automáticamente su voz</li>
+                    <li>Click nuevamente para detener la grabación</li>
+                </ul>
+
+                <h6 class="mt-4"><i class="bi bi-camera-fill"></i> Subir Imágenes</h6>
+                <ul>
+                    <li>Click en el botón "Elegir archivos" en la sección de Evidencia Fotográfica</li>
+                    <li>Mantenga presionado <kbd>Ctrl</kbd> (Windows) o <kbd>Cmd</kbd> (Mac) para seleccionar múltiples archivos</li>
+                    <li>Puede seleccionar hasta <strong>20 imágenes</strong></li>
+                    <li>Formatos aceptados: JPG, PNG, GIF</li>
+                    <li>Tamaño recomendado: Máximo 5MB por imagen</li>
+                </ul>
+
+                <h6 class="mt-4"><i class="bi bi-eye"></i> Opciones Visuales</h6>
+                <ul>
+                    <li><strong>Tamaño de texto:</strong> Ajuste según su preferencia (A-, Normal, A+)</li>
+                    <li><strong>Alto contraste:</strong> Mejora la legibilidad para baja visión</li>
+                </ul>
+
+                <h6 class="mt-4"><i class="bi bi-headphones"></i> Lectores de Pantalla</h6>
+                <p>Este formulario es compatible con:</p>
+                <ul>
+                    <li>NVDA (Windows)</li>
+                    <li>JAWS (Windows)</li>
+                    <li>VoiceOver (Mac/iOS)</li>
+                    <li>TalkBack (Android)</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilos para alto contraste */
+    body.alto-contraste {
+        background: #000 !important;
+        color: #fff !important;
+    }
+
+    body.alto-contraste .card {
+        background: #1a1a1a !important;
+        border: 3px solid #fff !important;
+        color: #fff !important;
+    }
+
+    body.alto-contraste .form-control,
+    body.alto-contraste .form-select {
+        background: #000 !important;
+        color: #ffff00 !important;
+        border: 2px solid #ffff00 !important;
+        font-weight: bold;
+    }
+
+    body.alto-contraste label {
+        color: #fff !important;
+        font-weight: bold;
+    }
+
+    body.alto-contraste .btn {
+        border: 3px solid #fff !important;
+    }
+
+    /* Tamaños de texto */
+    body.texto-grande {
+        font-size: 1.25rem;
+    }
+
+    body.texto-muy-grande {
+        font-size: 1.5rem;
+    }
+
+    body.texto-grande .form-control,
+    body.texto-grande .form-select,
+    body.texto-muy-grande .form-control,
+    body.texto-muy-grande .form-select {
+        font-size: inherit;
+        padding: 1rem;
+    }
+
+    /* Indicador visual de foco mejorado */
+    *:focus {
+        outline: 3px solid var(--movistar-verde) !important;
+        outline-offset: 2px !important;
+    }
+
+    /* Animación para el indicador de grabación */
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+
+    .grabando {
+        animation: pulse 1.5s infinite;
+        background-color: #d4edda !important;
+        border: 2px solid var(--movistar-verde) !important;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar soporte de Web Speech API
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+    let campoActual = null;
+    let botonActual = null;
+
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'es-CL';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        recognition.onstart = function() {
+            document.getElementById('indicadorGrabacion').classList.remove('d-none');
+            if (campoActual) {
+                const input = document.getElementById('id_' + campoActual);
+                if (input) input.classList.add('grabando');
+            }
+            if (botonActual) {
+                botonActual.innerHTML = '<i class="bi bi-stop-circle"></i>';
+                botonActual.classList.remove('btn-success');
+                botonActual.classList.add('btn-danger');
+            }
+        };
+
+        recognition.onend = function() {
+            document.getElementById('indicadorGrabacion').classList.add('d-none');
+            if (campoActual) {
+                const input = document.getElementById('id_' + campoActual);
+                if (input) input.classList.remove('grabando');
+            }
+            if (botonActual) {
+                botonActual.innerHTML = '<i class="bi bi-mic-fill"></i>';
+                botonActual.classList.remove('btn-danger');
+                botonActual.classList.add('btn-success');
+            }
+        };
+
+        recognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript;
+
+            if (campoActual) {
+                const input = document.getElementById('id_' + campoActual);
+                if (input) {
+                    input.value = transcript;
+
+                    // Mostrar transcripción
+                    const transcripDiv = document.querySelector(`[data-campo="${campoActual}"]`);
+                    if (transcripDiv) {
+                        transcripDiv.classList.remove('d-none');
+                        transcripDiv.innerHTML = `<small class="text-success">
+                            <i class="bi bi-check-circle"></i> Transcrito: "${transcript}"
+                        </small>`;
+                    }
+                }
+            }
+        };
+
+        recognition.onerror = function(event) {
+            console.error('Error de reconocimiento:', event.error);
+            alert('Error en el reconocimiento de voz: ' + event.error + '. Por favor, intente nuevamente.');
+            document.getElementById('indicadorGrabacion').classList.add('d-none');
+        };
+    } else {
+        // Deshabilitar botones de voz si no hay soporte
+        document.querySelectorAll('[data-campo]').forEach(btn => {
+            if (btn.tagName === 'BUTTON') {
+                btn.disabled = true;
+                btn.title = 'Su navegador no soporta reconocimiento de voz';
+            }
+        });
+        alert('Su navegador no soporta reconocimiento de voz. Use Chrome o Edge para mejor compatibilidad.');
+    }
+
+    // Botones de dictado
+    document.querySelectorAll('button[data-campo]').forEach(button => {
+        button.addEventListener('click', function() {
+            if (!recognition) return;
+
+            campoActual = this.getAttribute('data-campo');
+            botonActual = this;
+
+            try {
+                recognition.start();
+            } catch (e) {
+                console.error('Error al iniciar reconocimiento:', e);
+            }
+        });
+    });
+
+    // Control de tamaño de texto
+    document.getElementById('btnTextoMas').addEventListener('click', function() {
+        document.body.classList.remove('texto-grande');
+        document.body.classList.add('texto-muy-grande');
+        anunciar('Texto aumentado al máximo');
+    });
+
+    document.getElementById('btnTextoNormal').addEventListener('click', function() {
+        document.body.classList.remove('texto-grande', 'texto-muy-grande');
+        anunciar('Texto en tamaño normal');
+    });
+
+    document.getElementById('btnTextoMenos').addEventListener('click', function() {
+        document.body.classList.remove('texto-muy-grande');
+        document.body.classList.add('texto-grande');
+        anunciar('Texto reducido');
+    });
+
+    // Alto contraste
+    document.getElementById('btnContraste').addEventListener('click', function() {
+        document.body.classList.toggle('alto-contraste');
+        const activo = document.body.classList.contains('alto-contraste');
+        this.innerHTML = activo ? '<i class="bi bi-brightness-high"></i> Contraste Normal' : '<i class="bi bi-brightness-high"></i> Alto Contraste';
+        anunciar(activo ? 'Modo de alto contraste activado' : 'Modo normal activado');
+    });
+
+    // Ayuda
+    document.getElementById('btnAyuda').addEventListener('click', function() {
+        const modalEl = document.getElementById('modalAyuda');
+        if (modalEl) {
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+    });
+
+    // Función para anunciar a lectores de pantalla
+    function anunciar(mensaje) {
+        const anuncio = document.createElement('div');
+        anuncio.setAttribute('role', 'status');
+        anuncio.setAttribute('aria-live', 'polite');
+        anuncio.className = 'visually-hidden';
+        anuncio.textContent = mensaje;
+        document.body.appendChild(anuncio);
+        setTimeout(() => document.body.removeChild(anuncio), 1000);
+    }
+
+    // Contador de imágenes seleccionadas
+    const inputImagenes = document.getElementById('id_imagenes');
+    if (inputImagenes) {
+        // Agregar atributo multiple al input de imágenes
+        inputImagenes.setAttribute('multiple', 'multiple');
+
+        inputImagenes.addEventListener('change', function(e) {
+            const numImagenes = e.target.files.length;
+            const preview = document.getElementById('preview-imagenes');
+            const contador = document.getElementById('contador-imagenes');
+
+            if (numImagenes > 0) {
+                preview.classList.remove('d-none');
+                contador.textContent = numImagenes;
+
+                if (numImagenes > 20) {
+                    alert('Atención: Ha seleccionado ' + numImagenes + ' imágenes. Solo se procesarán las primeras 20.');
+                    anunciar('Advertencia: Solo se procesarán las primeras 20 imágenes');
+                } else {
+                    anunciar(numImagenes + ' imagen' + (numImagenes === 1 ? '' : 'es') + ' seleccionada' + (numImagenes === 1 ? '' : 's'));
+                }
+            } else {
+                preview.classList.add('d-none');
+            }
+        });
+    }
+
+    // Leer título al cargar
+    setTimeout(() => {
+        anunciar('Formulario de creación de informe accesible cargado. Use Tab para navegar entre campos. Los campos con botón verde pueden dictarse por voz.');
+    }, 500);
+});
+</script>
+
+{% endblock %}

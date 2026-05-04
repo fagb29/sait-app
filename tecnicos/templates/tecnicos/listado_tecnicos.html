@@ -1,0 +1,202 @@
+<!-- Página de listado de técnicos con sus indicadores -->
+{% extends 'tecnicos/base.html' %}
+
+{% block title %}Listado de Técnicos - Movistar{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 class="mb-0">Listado de Técnicos</h1>
+            <a href="{% url 'crear_informe_general' %}" class="btn btn-success">
+                <i class="bi bi-file-earmark-plus"></i> Crear Informe
+            </a>
+        </div>
+
+        <!-- Barra de búsqueda -->
+        <form method="get" class="mb-4">
+            <div class="input-group">
+                <input type="text" name="buscar" class="form-control" placeholder="Buscar por código o nombre..." value="{{ busqueda }}">
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+                {% if busqueda %}
+                    <a href="{% url 'listado_tecnicos' %}" class="btn btn-secondary">Limpiar</a>
+                {% endif %}
+            </div>
+        </form>
+
+        <!-- Resumen de técnicos -->
+        <div class="alert alert-info">
+            Total de técnicos activos: <strong>{{ total_tecnicos }}</strong>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de técnicos con filtros laterales -->
+<div class="row">
+    <!-- Panel de Filtros Lateral -->
+    <div class="col-md-3">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header card-header-movistar">
+                <h6 class="mb-0"><i class="bi bi-funnel-fill"></i> Filtros</h6>
+            </div>
+            <div class="card-body">
+                <!-- Filtros activos -->
+                {% if agencia_filtro or empresa_filtro or zona_filtro %}
+                <div class="mb-3">
+                    <h6 class="text-muted small">Filtros activos:</h6>
+                    {% if agencia_filtro %}
+                        <span class="badge bg-success mb-1 d-block text-start">Agencia: {{ agencia_filtro }}</span>
+                    {% endif %}
+                    {% if empresa_filtro %}
+                        <span class="badge bg-info mb-1 d-block text-start">Empresa: {{ empresa_filtro }}</span>
+                    {% endif %}
+                    {% if zona_filtro %}
+                        <span class="badge bg-warning text-dark mb-1 d-block text-start">Zona: {{ zona_filtro }}</span>
+                    {% endif %}
+                    <a href="{% url 'listado_tecnicos' %}" class="btn btn-sm btn-danger w-100 mt-2">
+                        <i class="bi bi-x-circle"></i> Limpiar Filtros
+                    </a>
+                </div>
+                <hr>
+                {% endif %}
+
+                <!-- Filtro por Agencia -->
+                <div class="mb-3">
+                    <h6 class="fw-bold"><i class="bi bi-building"></i> Agencia</h6>
+                    <select class="form-select form-select-sm" id="filtroAgencia" onchange="aplicarFiltro('agencia', this.value)">
+                        <option value="">Todas las agencias</option>
+                        {% for agencia in agencias %}
+                            <option value="{{ agencia }}" {% if agencia_filtro == agencia %}selected{% endif %}>{{ agencia }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Filtro por Empresa -->
+                <div class="mb-3">
+                    <h6 class="fw-bold"><i class="bi bi-briefcase"></i> Empresa</h6>
+                    <select class="form-select form-select-sm" id="filtroEmpresa" onchange="aplicarFiltro('empresa', this.value)">
+                        <option value="">Todas las empresas</option>
+                        {% for empresa in empresas %}
+                            <option value="{{ empresa }}" {% if empresa_filtro == empresa %}selected{% endif %}>{{ empresa }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Filtro por Zona -->
+                <div class="mb-3">
+                    <h6 class="fw-bold"><i class="bi bi-geo-alt"></i> Zona</h6>
+                    <select class="form-select form-select-sm" id="filtroZona" onchange="aplicarFiltro('zona', this.value)">
+                        <option value="">Todas las zonas</option>
+                        {% for zona in zonas %}
+                            <option value="{{ zona }}" {% if zona_filtro == zona %}selected{% endif %}>{{ zona }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Técnicos -->
+    <div class="col-md-9">
+        <div class="card shadow-sm">
+            <div class="card-header card-header-movistar">
+                <h5 class="mb-0">Infancia por Técnico</h5>
+            </div>
+            <div class="card-body p-0">
+                {% if tecnicos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Código</th>
+                                    <th>Nombre</th>
+                                    <th class="text-center">Órdenes Completadas</th>
+                                    <th class="text-center">
+                                        Infancias
+                                        <a href="?{% if busqueda %}buscar={{ busqueda }}&{% endif %}{% if agencia_filtro %}agencia={{ agencia_filtro }}&{% endif %}{% if empresa_filtro %}empresa={{ empresa_filtro }}&{% endif %}{% if zona_filtro %}zona={{ zona_filtro }}&{% endif %}orden=infancias_asc" class="sort-btn" title="Ordenar de menor a mayor">
+                                            <i class="bi bi-arrow-up{% if orden == 'infancias_asc' %}-circle-fill{% endif %}"></i>
+                                        </a>
+                                        <a href="?{% if busqueda %}buscar={{ busqueda }}&{% endif %}{% if agencia_filtro %}agencia={{ agencia_filtro }}&{% endif %}{% if empresa_filtro %}empresa={{ empresa_filtro }}&{% endif %}{% if zona_filtro %}zona={{ zona_filtro }}&{% endif %}orden=infancias_desc" class="sort-btn" title="Ordenar de mayor a menor">
+                                            <i class="bi bi-arrow-down{% if orden == 'infancias_desc' %}-circle-fill{% endif %}"></i>
+                                        </a>
+                                    </th>
+                                    <th class="text-center">
+                                        % Infancia
+                                        <a href="?{% if busqueda %}buscar={{ busqueda }}&{% endif %}{% if agencia_filtro %}agencia={{ agencia_filtro }}&{% endif %}{% if empresa_filtro %}empresa={{ empresa_filtro }}&{% endif %}{% if zona_filtro %}zona={{ zona_filtro }}&{% endif %}orden=infancia_asc" class="sort-btn" title="Ordenar de menor a mayor">
+                                            <i class="bi bi-arrow-up{% if orden == 'infancia_asc' %}-circle-fill{% endif %}"></i>
+                                        </a>
+                                        <a href="?{% if busqueda %}buscar={{ busqueda }}&{% endif %}{% if agencia_filtro %}agencia={{ agencia_filtro }}&{% endif %}{% if empresa_filtro %}empresa={{ empresa_filtro }}&{% endif %}{% if zona_filtro %}zona={{ zona_filtro }}&{% endif %}orden=infancia_desc" class="sort-btn" title="Ordenar de mayor a menor">
+                                            <i class="bi bi-arrow-down{% if orden == 'infancia_desc' %}-circle-fill{% endif %}"></i>
+                                        </a>
+                                    </th>
+                                    <th class="text-center">Calificación</th>
+                                    <th class="text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tecnico in tecnicos %}
+                                    <tr>
+                                        <td><strong>{{ tecnico.codigo }}</strong></td>
+                                        <td>{{ tecnico.nombre }}</td>
+                                        <td class="text-center">
+                                            <span class="badge bg-success">{{ tecnico.ordenes_completadas }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-danger">{{ tecnico.total_infancias }}</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <!-- Barra de progreso para infancia -->
+                                            <div class="progress" style="height: 25px;">
+                                                <div class="progress-bar {% if tecnico.porcentaje_infancia <= 5 %}bg-success{% elif tecnico.porcentaje_infancia <= 10 %}bg-warning{% else %}bg-danger{% endif %}"
+                                                     role="progressbar"
+                                                     style="width: {{ tecnico.porcentaje_infancia }}%;">
+                                                    {{ tecnico.porcentaje_infancia }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge badge-movistar">{{ tecnico.calificacion_promedio }}/5.0</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <a href="{% url 'detalle_tecnico' tecnico.id %}" class="btn btn-sm btn-primary">
+                                                Ver Órdenes
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="p-4 text-center text-muted">
+                        <p class="mb-0">No se encontraron técnicos{% if busqueda %} con el criterio "{{ busqueda }}"{% endif %}.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript para manejar los filtros -->
+<script>
+function aplicarFiltro(tipo, valor) {
+    // Obtener los parámetros actuales de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+
+    // Actualizar o remover el parámetro según el valor
+    if (valor) {
+        urlParams.set(tipo, valor);
+    } else {
+        urlParams.delete(tipo);
+    }
+
+    // Mantener el parámetro de búsqueda si existe
+    const busqueda = urlParams.get('buscar');
+
+    // Redirigir con los nuevos parámetros
+    window.location.search = urlParams.toString();
+}
+</script>
+{% endblock %}
