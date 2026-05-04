@@ -244,23 +244,25 @@
                 <div class="transcripcion-temp d-none mt-2" data-campo="comentarios" aria-live="polite"></div>
             </div>
 
+            <!-- Campos ocultos GPS -->
+            <input type="hidden" id="foto_latitud" name="foto_latitud">
+            <input type="hidden" id="foto_longitud" name="foto_longitud">
+
             <!-- Evidencia Fotográfica -->
             <div class="mb-4">
                 <label for="{{ form.imagenes.id_for_label }}" class="form-label fw-bold" style="font-size: 1.1rem;">
                     <i class="bi bi-camera-fill"></i> {{ form.imagenes.label }}
+                    <span class="badge bg-danger ms-1">Requiere cámara y GPS</span>
                 </label>
+                <div class="alert alert-info py-2 mb-2">
+                    <i class="bi bi-shield-check"></i>
+                    <strong>Validación anti-fraude activa:</strong>
+                    Las fotos deben tomarse directamente desde la cámara.
+                    Se registra GPS en tiempo real. No se aceptan fotos oscuras o negras.
+                </div>
                 {{ form.imagenes }}
                 <div class="form-text" id="ayuda-imagenes">
-                    <i class="bi bi-info-circle"></i> Puede seleccionar hasta 20 imágenes (JPG, PNG, GIF).
-                    Mantenga presionado Ctrl (Windows) o Cmd (Mac) para seleccionar múltiples archivos.
-                    <br>
-                    <strong>Tamaño recomendado:</strong> Máximo 5MB por imagen.
-                </div>
-                <div id="preview-imagenes" class="mt-3 d-none">
-                    <p class="text-success">
-                        <i class="bi bi-check-circle"></i>
-                        <span id="contador-imagenes">0</span> imagen(es) seleccionada(s)
-                    </p>
+                    <i class="bi bi-info-circle"></i> Use el botón de cámara para tomar fotos directamente.
                 </div>
             </div>
 
@@ -423,8 +425,13 @@
     }
 </style>
 
+{% load static %}
+<script src="{% static 'tecnicos/js/camera_validator.js' %}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar validador de cámara anti-fraude
+    CameraValidator.init('id_imagenes', 'foto_latitud', 'foto_longitud');
+
     // Verificar soporte de Web Speech API
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = null;
@@ -561,32 +568,17 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => document.body.removeChild(anuncio), 1000);
     }
 
-    // Contador de imágenes seleccionadas
-    const inputImagenes = document.getElementById('id_imagenes');
-    if (inputImagenes) {
-        // Agregar atributo multiple al input de imágenes
-        inputImagenes.setAttribute('multiple', 'multiple');
-
-        inputImagenes.addEventListener('change', function(e) {
-            const numImagenes = e.target.files.length;
-            const preview = document.getElementById('preview-imagenes');
-            const contador = document.getElementById('contador-imagenes');
-
-            if (numImagenes > 0) {
-                preview.classList.remove('d-none');
-                contador.textContent = numImagenes;
-
-                if (numImagenes > 20) {
-                    alert('Atención: Ha seleccionado ' + numImagenes + ' imágenes. Solo se procesarán las primeras 20.');
-                    anunciar('Advertencia: Solo se procesarán las primeras 20 imágenes');
-                } else {
-                    anunciar(numImagenes + ' imagen' + (numImagenes === 1 ? '' : 'es') + ' seleccionada' + (numImagenes === 1 ? '' : 's'));
-                }
-            } else {
-                preview.classList.add('d-none');
-            }
-        });
-    }
+    // Validación GPS al enviar: exigir coordenadas si hay imágenes
+    document.getElementById('informeForm').addEventListener('submit', function(e) {
+        const lat = document.getElementById('foto_latitud').value;
+        const imagenes = document.getElementById('id_imagenes');
+        const tieneImagenes = imagenes && imagenes.files && imagenes.files.length > 0;
+        if (tieneImagenes && !lat) {
+            e.preventDefault();
+            alert('GPS requerido: active la ubicación y espere a que se registren las coordenadas antes de enviar.');
+            anunciar('Error: GPS no disponible. Active la ubicación del dispositivo.');
+        }
+    });
 
     // Leer título al cargar
     setTimeout(() => {

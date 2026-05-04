@@ -958,6 +958,14 @@ def crear_informe_accesible(request):
         form = InformeAccesibleForm(request.POST, request.FILES)
 
         if form.is_valid():
+            # GPS anti-fraude
+            lat_str = request.POST.get('foto_latitud', '').strip()
+            lng_str = request.POST.get('foto_longitud', '').strip()
+            imagenes_post = request.FILES.getlist('imagenes')
+            if imagenes_post and not lat_str:
+                form.add_error(None, 'GPS requerido: active la ubicación del dispositivo para subir fotos.')
+                return render(request, 'tecnicos/crear_informe_accesible.html', {'form': form})
+
             # Obtener datos del formulario
             tecnico_nombre = form.cleaned_data['tecnico']
             fecha = form.cleaned_data['fecha']
@@ -1007,6 +1015,15 @@ def crear_informe_accesible(request):
                 creado_por=creado_por,
                 infancia=False
             )
+
+            # Guardar GPS si fue capturado
+            if lat_str:
+                try:
+                    informe.latitud_gps = float(lat_str)
+                    informe.longitud_gps = float(lng_str)
+                    informe.save()
+                except ValueError:
+                    pass
 
             # Guardar las imágenes si existen (máximo 20)
             imagenes = request.FILES.getlist('imagenes')
