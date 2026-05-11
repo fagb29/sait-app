@@ -1,0 +1,126 @@
+{% extends 'tecnicos/base.html' %}
+{% load static %}
+
+{% block title %}Regularizar Inspección{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'listado_informes' %}">Informes</a></li>
+                <li class="breadcrumb-item active">Regularizar Inspección</li>
+            </ol>
+        </nav>
+        <h1><i class="bi bi-check2-circle text-success"></i> Regularizar Inspección</h1>
+        <p class="text-muted">Informe original: <strong>{{ informe.orden_trabajo.numero_orden }}</strong> — {{ informe.orden_trabajo.tecnico.nombre }}</p>
+    </div>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="card shadow-sm">
+    <div class="card-header" style="background: linear-gradient(135deg,#0033A0,#00A9CE); color:white;">
+        <h5 class="mb-0"><i class="bi bi-clipboard2-check"></i> Formulario de Regularización</h5>
+    </div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data" id="regForm">
+            {% csrf_token %}
+
+            <!-- GPS oculto -->
+            <input type="hidden" id="reg_latitud" name="reg_latitud">
+            <input type="hidden" id="reg_longitud" name="reg_longitud">
+
+            <!-- Realizado por -->
+            <div class="mb-3">
+                <label class="form-label fw-bold"><i class="bi bi-person-check"></i> {{ form.creado_por.label }}</label>
+                {{ form.creado_por }}
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+                <label class="form-label fw-bold"><i class="bi bi-envelope"></i> {{ form.email_inspector.label }}</label>
+                {{ form.email_inspector }}
+            </div>
+
+            <!-- Comentario -->
+            <div class="mb-3">
+                <label class="form-label fw-bold"><i class="bi bi-chat-left-text"></i> {{ form.comentario.label }}</label>
+                {{ form.comentario }}
+                <div class="form-text">Describa detalladamente qué se realizó para regularizar el trabajo mal ejecutado.</div>
+            </div>
+
+            <!-- Fotos de regularización (máx 3 con validación anti-fraude) -->
+            <div class="mb-4">
+                <label class="form-label fw-bold">
+                    <i class="bi bi-camera-fill"></i> Fotos de Regularización
+                    <span class="badge bg-danger ms-1">Máximo 3 — Requiere cámara y GPS</span>
+                </label>
+                <div class="alert alert-info py-2 mb-2">
+                    <i class="bi bi-shield-check"></i>
+                    <strong>Validación anti-fraude:</strong> Las fotos deben tomarse desde la cámara en tiempo real.
+                    Se registra GPS y hora. No se aceptan fotos oscuras.
+                </div>
+
+                <!-- Foto 1 -->
+                <div class="mb-3">
+                    <label class="form-label">{{ form.foto1.label }}</label>
+                    {{ form.foto1 }}
+                </div>
+                <!-- Foto 2 -->
+                <div class="mb-3">
+                    <label class="form-label">{{ form.foto2.label }}</label>
+                    {{ form.foto2 }}
+                </div>
+                <!-- Foto 3 -->
+                <div class="mb-3">
+                    <label class="form-label">{{ form.foto3.label }}</label>
+                    {{ form.foto3 }}
+                </div>
+
+                <div id="gps-status-reg" class="d-none"></div>
+            </div>
+
+            <div class="d-flex gap-2 justify-content-between">
+                <a href="{% url 'listado_informes' %}" class="btn btn-secondary btn-lg">
+                    <i class="bi bi-x-circle"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="bi bi-check2-circle"></i> Guardar Regularización y Generar PDF
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="{% static 'tecnicos/js/camera_validator.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Inicializar validador anti-fraude en las 3 fotos
+    ['id_foto1', 'id_foto2', 'id_foto3'].forEach(function(id) {
+        CameraValidator.init(id, 'reg_latitud', 'reg_longitud');
+    });
+
+    // Validar GPS al enviar si hay fotos
+    document.getElementById('regForm').addEventListener('submit', function(e) {
+        const lat = document.getElementById('reg_latitud').value;
+        const foto1 = document.getElementById('id_foto1');
+        const foto2 = document.getElementById('id_foto2');
+        const foto3 = document.getElementById('id_foto3');
+        const hayFotos = (foto1 && foto1.files && foto1.files.length > 0) ||
+                         (foto2 && foto2.files && foto2.files.length > 0) ||
+                         (foto3 && foto3.files && foto3.files.length > 0);
+        if (hayFotos && !lat) {
+            e.preventDefault();
+            alert('GPS requerido: active la ubicación del dispositivo antes de enviar las fotos.');
+        }
+    });
+});
+</script>
+{% endblock %}

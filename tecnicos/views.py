@@ -9,10 +9,10 @@ from django.http import FileResponse, HttpResponse
 from django.utils import timezone
 from django.db.models import Q, Count, Sum, F, FloatField
 from django.db.models.functions import Cast
-from .models import Tecnico, OrdenTrabajo, InformeMejora, ImagenInforme
-from .forms import InformeForm, ImagenInformeFormSet, InformeGeneralForm, InformeAccesibleForm
+from .models import Tecnico, OrdenTrabajo, InformeMejora, ImagenInforme, RegularizacionInforme, FotoRegularizacion
+from .forms import InformeForm, ImagenInformeFormSet, InformeGeneralForm, InformeAccesibleForm, RegularizacionForm
 from .forms_admin import CrearUsuarioForm, EditarUsuarioForm, CambiarContrasenaForm
-from .pdf_generator import generar_pdf_informe
+from .pdf_generator import generar_pdf_informe, generar_pdf_regularizacion
 import os
 
 
@@ -741,8 +741,8 @@ def editar_informe(request, informe_id):
     """
     Permite editar un informe existente. Solo accesible para usuarios del grupo Gerencia.
     """
-    # Verificar que el usuario pertenece al grupo Gerencia
-    if not request.user.groups.filter(name='Gerencia').exists() and not request.user.is_superuser:
+    grupos_con_edicion = ['Gerencia', 'Supervisores', 'Auditores']
+    if not request.user.groups.filter(name__in=grupos_con_edicion).exists() and not request.user.is_superuser:
         messages.error(request, 'No tiene permisos para editar informes')
         return redirect('listado_informes')
 
@@ -1069,3 +1069,68 @@ def crear_informe_accesible(request):
     }
 
     return render(request, 'tecnicos/crear_informe_accesible.html', context)
+
+
+# ===== REGULARIZACIÓN DE INSPECCIONES =====
+
+@login_required
+def regularizar_informe(request, informe_id):
+    """Permite a Supervisores, Auditores y Gerencia regularizar una inspección."""
+    grupos_permitidos = ['Gerencia', 'Supervisores', 'Auditores']
+    if not request.user.groups.filter(name__in=grupos_permitidos).exists() and not request.user.is_superuser:
+        messages.error(request, 'No tiene permisos para regularizar inspecciones.')
+        return redirect('listado_informes')
+
+    informe = get_object_or_404(InformeMejora, id=informe_id)
+
+    if request.method == 'POST':
+        form = RegularizacionForm(request.POST, request.FILES)
+        if form.is_valid():
+            lat_str = request.POST.get('reg_latitud', '').strip()
+            lng_str = request.POST.get('reg_longitud', '').strip()
+
+            fotos = [
+                request.FILES.get('foto1'),
+                request.FILES.get('foto2'),
+                request.FILES.get('foto3'),
+            ]
+            fotos = [f for f in fotos if f]
+
+            if fotos and not lat_str:
+                form.add_error(None, 'GPS requerido: active la ubicación para subir fotos de regularización.')
+                return render(request, 'tecnicos/regularizar_informe.html', {'form': form, 'informe': informe})
+
+            reg = RegularizacionInforme.objects.create(
+                informe=informe,
+                comentario=form.cleaned_data['comentario'],
+                creado_por=form.cleaned_data['creado_por'],
+                email_inspector=form.cleaned_data.get('email_inspector') or None,
+            )
+
+            if lat_str:
+                try:
+                    reg.latitud_gps = float(lat_str)
+                    reg.longitud_gps = float(lng_str)
+                    reg.save()
+                except ValueError:
+                    pass
+
+            for idx, foto in enumerate(fotos[:3]):
+                FotoRegularizacion.objects.create(regularizacion=reg, imagen=foto, orden=idx)
+
+            # Generar PDF de regularización
+            try:
+                pdf_path = generar_pdf_regularizacion(reg)
+                reg.archivo_pdf = pdf_path
+                reg.save()
+            except Exception as e:
+                messages.warning(request, f'Regularización guardada pero error al generar PDF: {e}')
+
+            messages.success(request, 'Regularización registrada exitosamente.')
+            return redirect('listado_informes')
+    else:
+        form = RegularizacionForm(initial={
+            'creado_por': request.user.get_full_name() or request.user.username
+        })
+
+    return render(request, 'tecnicos/regularizar_informe.html', {'form': form, 'informe': informe})

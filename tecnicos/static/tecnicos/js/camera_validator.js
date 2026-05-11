@@ -55,6 +55,17 @@ const CameraValidator = (function () {
         el.classList.remove('d-none');
     }
 
+    function buildMapLink(lat, lng) {
+        const now = new Date();
+        const hora = now.toLocaleTimeString('es-CL');
+        const fecha = now.toLocaleDateString('es-CL');
+        const url = `https://maps.google.com/?q=${lat},${lng}`;
+        return `<br><small><i class="bi bi-clock"></i> <b>Hora:</b> ${fecha} ${hora} &nbsp;|&nbsp;
+            <a href="${url}" target="_blank" rel="noopener">
+                <i class="bi bi-geo-alt-fill"></i> Confirmar ubicación en Maps
+            </a></small>`;
+    }
+
     // ─── Modo MÓVIL: cámara en vivo con getUserMedia ────────────────────────────
     function buildMobileUI(fileInput, latInput, lngInput) {
         fileInput.style.display = 'none';
@@ -143,7 +154,7 @@ const CameraValidator = (function () {
                 latInput.value = coords.lat;
                 lngInput.value = coords.lng;
                 setStatus(statusEl,
-                    `<i class="bi bi-geo-alt-fill text-success"></i> GPS obtenido: <strong>${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}</strong>`,
+                    `<i class="bi bi-geo-alt-fill text-success"></i> GPS obtenido: <strong>${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}</strong>${buildMapLink(coords.lat, coords.lng)}`,
                     'success');
             } catch (err) {
                 setStatus(statusEl, `<i class="bi bi-exclamation-triangle-fill"></i> <strong>ERROR GPS:</strong> ${err.message}`, 'danger');
@@ -211,7 +222,7 @@ const CameraValidator = (function () {
                 latInput.value = coords.lat;
                 lngInput.value = coords.lng;
                 setStatus(statusEl,
-                    `<i class="bi bi-geo-alt-fill text-success"></i> Ubicación GPS registrada: <strong>${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}</strong>`,
+                    `<i class="bi bi-geo-alt-fill text-success"></i> Ubicación GPS registrada: <strong>${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}</strong>${buildMapLink(coords.lat, coords.lng)}`,
                     'success');
             })
             .catch(err => {

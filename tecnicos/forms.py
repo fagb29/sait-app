@@ -1,7 +1,7 @@
 # Formularios para la aplicación
 from django import forms
 from django.forms import inlineformset_factory
-from .models import InformeMejora, ImagenInforme
+from .models import InformeMejora, ImagenInforme, RegularizacionInforme
 
 
 class InformeForm(forms.ModelForm):
@@ -80,10 +80,13 @@ class InformeGeneralForm(forms.Form):
     Formulario para crear un informe general sin estar ligado a una orden específica.
     """
     numero_peticion = forms.CharField(
-        max_length=100,
+        max_length=20,
         widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Ingrese el número de petición'
+            'placeholder': 'Ej: 12345678',
+            'inputmode': 'numeric',
+            'pattern': '[0-9]+',
+            'title': 'Solo se permiten números'
         }),
         label='Número de Petición'
     )
@@ -328,3 +331,48 @@ class InformeAccesibleForm(forms.Form):
         required=False,
         help_text='Puede seleccionar hasta 20 imágenes. Use el botón de ayuda para instrucciones'
     )
+
+
+class RegularizacionForm(forms.Form):
+    """Formulario para regularizar una inspección deficiente."""
+    comentario = forms.CharField(
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 5,
+            'placeholder': 'Comente qué se realizó para regularizar la inspección / trabajo mal realizado...',
+        }),
+        label='Comentario de regularización *'
+    )
+    creado_por = forms.CharField(
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Su nombre completo',
+        }),
+        label='Realizado por *'
+    )
+    email_inspector = forms.EmailField(
+        required=False,
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'correo@ejemplo.com',
+        }),
+        label='Correo del Inspector (opcional)'
+    )
+    # Hasta 3 fotos con los mismos validadores anti-fraude
+    foto1 = forms.ImageField(
+        required=False,
+        widget=forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*', 'id': 'id_foto1'}),
+        label='Foto de regularización 1'
+    )
+    foto2 = forms.ImageField(
+        required=False,
+        widget=forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*', 'id': 'id_foto2'}),
+        label='Foto de regularización 2'
+    )
+    foto3 = forms.ImageField(
+        required=False,
+        widget=forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*', 'id': 'id_foto3'}),
+        label='Foto de regularización 3'
+    )
+

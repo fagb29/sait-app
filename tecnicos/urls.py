@@ -45,4 +45,7 @@ urlpatterns = [
 
     # Accesibilidad (Ley 21.015 de Inclusión)
     path('informe/crear-accesible/', views.crear_informe_accesible, name='crear_informe_accesible'),
+
+    # Regularización de inspecciones
+    path('informe/regularizar/<int:informe_id>/', views.regularizar_informe, name='regularizar_informe'),
 ]

@@ -188,3 +188,43 @@ class ImagenInforme(models.Model):
 
     def __str__(self):
         return f"Imagen {self.orden} - {self.informe}"
+
+
+class RegularizacionInforme(models.Model):
+    """
+    Registra la regularización de un informe: fotos + comentario de corrección.
+    """
+    informe = models.ForeignKey(
+        InformeMejora,
+        on_delete=models.CASCADE,
+        related_name='regularizaciones',
+        verbose_name="Informe original"
+    )
+    comentario = models.TextField(verbose_name="Comentario de regularización")
+    creado_por = models.CharField(max_length=100, verbose_name="Creado por")
+    email_inspector = models.EmailField(max_length=254, blank=True, null=True, verbose_name="Email inspector")
+    latitud_gps = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    longitud_gps = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
+    fecha_creacion = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de regularización")
+    archivo_pdf = models.FileField(upload_to='regularizaciones/pdfs/%Y/%m/', null=True, blank=True)
+
+    class Meta:
+        verbose_name = "Regularización de Informe"
+        ordering = ['-fecha_creacion']
+
+    def __str__(self):
+        return f"Regularización de {self.informe} ({self.fecha_creacion.strftime('%d/%m/%Y')})"
+
+
+class FotoRegularizacion(models.Model):
+    """Fotos adjuntas a una regularización (máximo 3)."""
+    regularizacion = models.ForeignKey(
+        RegularizacionInforme,
+        on_delete=models.CASCADE,
+        related_name='fotos'
+    )
+    imagen = models.ImageField(upload_to='regularizaciones/fotos/%Y/%m/')
+    orden = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['orden']
