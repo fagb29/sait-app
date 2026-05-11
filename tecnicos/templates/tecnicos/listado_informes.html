@@ -88,7 +88,7 @@
                                             {% endif %}
 
                                             <!-- Editar: Gerencia, Supervisores, Auditores -->
-                                            {% if user.is_superuser or user.groups.filter(name__in='Gerencia,Supervisores,Auditores').exists %}
+                                            {% if puede_editar %}
                                                 <a href="{% url 'editar_informe' informe.id %}" class="btn btn-sm btn-warning" title="Editar informe">
                                                     <i class="bi bi-pencil"></i> Editar
                                                 </a>
@@ -97,7 +97,7 @@
                                                 </a>
                                             {% endif %}
                                             <!-- Eliminar: solo Gerencia -->
-                                            {% if user.is_superuser or user.groups.filter(name='Gerencia').exists %}
+                                            {% if puede_eliminar %}
                                                 <form method="post" action="{% url 'eliminar_informe' informe.id %}" style="display: inline;" onsubmit="return confirm('¿Está seguro de eliminar este informe?');">
                                                     {% csrf_token %}
                                                     <button type="submit" class="btn btn-sm btn-danger" title="Eliminar informe">

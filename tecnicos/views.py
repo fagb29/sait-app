@@ -405,11 +405,17 @@ def listado_informes(request):
     # Obtener lista de técnicos para el filtro
     tecnicos = Tecnico.objects.filter(activo=True).order_by('nombre')
 
+    puede_editar = request.user.is_superuser or request.user.groups.filter(
+        name__in=['Gerencia', 'Supervisores', 'Auditores']).exists()
+    puede_eliminar = request.user.is_superuser or request.user.groups.filter(name='Gerencia').exists()
+
     context = {
         'informes': informes,
         'tecnicos': tecnicos,
         'tecnico_id': tecnico_id,
         'enviado': enviado,
+        'puede_editar': puede_editar,
+        'puede_eliminar': puede_eliminar,
     }
 
     return render(request, 'tecnicos/listado_informes.html', context)
