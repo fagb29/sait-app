@@ -1124,15 +1124,20 @@ def regularizar_informe(request, informe_id):
             for idx, foto in enumerate(fotos[:3]):
                 FotoRegularizacion.objects.create(regularizacion=reg, imagen=foto, orden=idx)
 
-            # Generar PDF de regularización
+            # Regenerar PDF del informe original con la regularización anexada al final
             try:
+                import traceback
                 pdf_path = generar_pdf_regularizacion(reg)
                 reg.archivo_pdf = pdf_path
-                reg.save()
+                reg.save(update_fields=['archivo_pdf'])
+                messages.success(request,
+                    'Regularización registrada. El PDF del informe fue actualizado con las nuevas páginas.')
             except Exception as e:
-                messages.warning(request, f'Regularización guardada pero error al generar PDF: {e}')
+                import traceback
+                traceback.print_exc()
+                messages.warning(request, f'Regularización guardada, pero error al actualizar PDF: {e}')
+                messages.success(request, 'Regularización registrada exitosamente.')
 
-            messages.success(request, 'Regularización registrada exitosamente.')
             return redirect('listado_informes')
     else:
         form = RegularizacionForm(initial={
