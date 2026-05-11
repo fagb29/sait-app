@@ -4,14 +4,14 @@
 {% block title %}Listado de Informes - Movistar{% endblock %}
 
 {% block content %}
-<div class="row mb-4">
-    <div class="col-md-12">
+<div class="row mb-3">
+    <div class="col-12">
         <h1 class="mb-3">Listado de Informes de Mejora</h1>
 
         <!-- Filtros -->
         <form method="get" class="mb-4">
             <div class="row g-2">
-                <div class="col-md-4">
+                <div class="col-12 col-md-4">
                     <select name="tecnico" class="form-select">
                         <option value="">Todos los técnicos</option>
                         {% for tec in tecnicos %}
@@ -21,103 +21,171 @@
                         {% endfor %}
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-12 col-md-3">
                     <select name="enviado" class="form-select">
                         <option value="">Estado de envío</option>
                         <option value="si" {% if enviado == 'si' %}selected{% endif %}>Enviado</option>
                         <option value="no" {% if enviado == 'no' %}selected{% endif %}>No enviado</option>
                     </select>
                 </div>
-                <div class="col-md-3">
-                    <button type="submit" class="btn btn-primary">Filtrar</button>
-                    <a href="{% url 'listado_informes' %}" class="btn btn-secondary">Limpiar</a>
+                <div class="col-12 col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill">Filtrar</button>
+                    <a href="{% url 'listado_informes' %}" class="btn btn-secondary flex-fill">Limpiar</a>
                 </div>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Tabla de informes -->
-<div class="row">
-    <div class="col-md-12">
-        <div class="card shadow-sm">
-            <div class="card-header card-header-movistar">
-                <h5 class="mb-0">Informes Generados</h5>
-            </div>
-            <div class="card-body p-0">
-                {% if informes %}
-                    <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
+<!-- VISTA ESCRITORIO: tabla -->
+<div class="d-none d-md-block">
+    <div class="card shadow-sm">
+        <div class="card-header card-header-movistar">
+            <h5 class="mb-0">Informes Generados</h5>
+        </div>
+        <div class="card-body p-0">
+            {% if informes %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Orden</th>
+                                <th>Técnico</th>
+                                <th>Fecha Creación</th>
+                                <th class="text-center">Email</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for informe in informes %}
                                 <tr>
-                                    <th>Orden</th>
-                                    <th>Técnico</th>
-                                    <th>Fecha Creación</th>
-                                    <th class="text-center">Email Enviado</th>
-                                    <th class="text-center">Fecha Envío</th>
-                                    <th class="text-center">Acciones</th>
+                                    <td><strong>{{ informe.orden_trabajo.numero_orden }}</strong></td>
+                                    <td>{{ informe.orden_trabajo.tecnico.nombre }}</td>
+                                    <td>{{ informe.fecha_creacion|date:"d/m/Y H:i" }}</td>
+                                    <td class="text-center">
+                                        {% if informe.email_enviado %}
+                                            <span class="badge bg-success">Sí</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">No</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        {% if informe.archivo_pdf %}
+                                            <a href="{% url 'descargar_pdf' informe.id %}" class="btn btn-sm btn-primary">
+                                                <i class="bi bi-download"></i> PDF
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">Sin PDF</span>
+                                        {% endif %}
+                                        {% if puede_editar %}
+                                            <a href="{% url 'editar_informe' informe.id %}" class="btn btn-sm btn-warning">
+                                                <i class="bi bi-pencil"></i> Editar
+                                            </a>
+                                            <a href="{% url 'regularizar_informe' informe.id %}" class="btn btn-sm btn-success">
+                                                <i class="bi bi-check2-circle"></i> Regularizar
+                                            </a>
+                                        {% endif %}
+                                        {% if puede_eliminar %}
+                                            <form method="post" action="{% url 'eliminar_informe' informe.id %}" style="display:inline;" onsubmit="return confirm('¿Eliminar este informe?');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-danger">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {% for informe in informes %}
-                                    <tr>
-                                        <td><strong>{{ informe.orden_trabajo.numero_orden }}</strong></td>
-                                        <td>{{ informe.orden_trabajo.tecnico.nombre }}</td>
-                                        <td>{{ informe.fecha_creacion|date:"d/m/Y H:i" }}</td>
-                                        <td class="text-center">
-                                            {% if informe.email_enviado %}
-                                                <span class="badge bg-success">Sí</span>
-                                            {% else %}
-                                                <span class="badge bg-warning text-dark">No</span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="text-center">
-                                            {% if informe.fecha_envio_email %}
-                                                {{ informe.fecha_envio_email|date:"d/m/Y H:i" }}
-                                            {% else %}
-                                                <span class="text-muted">-</span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="text-center">
-                                            {% if informe.archivo_pdf %}
-                                                <a href="{% url 'descargar_pdf' informe.id %}" class="btn btn-sm btn-primary">
-                                                    <i class="bi bi-download"></i> PDF
-                                                </a>
-                                            {% else %}
-                                                <span class="text-muted">Sin PDF</span>
-                                            {% endif %}
-
-                                            <!-- Editar: Gerencia, Supervisores, Auditores -->
-                                            {% if puede_editar %}
-                                                <a href="{% url 'editar_informe' informe.id %}" class="btn btn-sm btn-warning" title="Editar informe">
-                                                    <i class="bi bi-pencil"></i> Editar
-                                                </a>
-                                                <a href="{% url 'regularizar_informe' informe.id %}" class="btn btn-sm btn-success" title="Regularizar inspección">
-                                                    <i class="bi bi-check2-circle"></i> Regularizar
-                                                </a>
-                                            {% endif %}
-                                            <!-- Eliminar: solo Gerencia -->
-                                            {% if puede_eliminar %}
-                                                <form method="post" action="{% url 'eliminar_informe' informe.id %}" style="display: inline;" onsubmit="return confirm('¿Está seguro de eliminar este informe?');">
-                                                    {% csrf_token %}
-                                                    <button type="submit" class="btn btn-sm btn-danger" title="Eliminar informe">
-                                                        <i class="bi bi-trash"></i> Eliminar
-                                                    </button>
-                                                </form>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <div class="p-4 text-center text-muted">
-                        <p class="mb-0">No se encontraron informes con los filtros seleccionados.</p>
-                    </div>
-                {% endif %}
-            </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="p-4 text-center text-muted">No se encontraron informes.</div>
+            {% endif %}
         </div>
     </div>
 </div>
+
+<!-- VISTA MÓVIL: tarjetas -->
+<div class="d-md-none">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="mb-0">Informes Generados</h5>
+        <span class="badge bg-secondary">{{ informes|length }} informe{{ informes|length|pluralize:"s" }}</span>
+    </div>
+
+    {% if informes %}
+        {% for informe in informes %}
+        <div class="card mb-3 shadow-sm border-0" style="border-left: 4px solid #0033A0 !important;">
+            <div class="card-body py-3 px-3">
+
+                <!-- Encabezado de la tarjeta -->
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <span class="fw-bold text-primary" style="font-size:1.05rem;">
+                            <i class="bi bi-file-earmark-text"></i> {{ informe.orden_trabajo.numero_orden }}
+                        </span>
+                        <br>
+                        <small class="text-muted">
+                            <i class="bi bi-person"></i> {{ informe.orden_trabajo.tecnico.nombre }}
+                        </small>
+                    </div>
+                    <div class="text-end">
+                        {% if informe.email_enviado %}
+                            <span class="badge bg-success">Email enviado</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Sin enviar</span>
+                        {% endif %}
+                        {% if informe.regularizaciones.exists %}
+                            <br><span class="badge bg-info text-dark mt-1">
+                                <i class="bi bi-check2-circle"></i> Regularizado
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Fecha -->
+                <div class="text-muted mb-3" style="font-size:0.85rem;">
+                    <i class="bi bi-calendar3"></i>
+                    {{ informe.fecha_creacion|date:"d/m/Y H:i" }}
+                </div>
+
+                <!-- Botones de acción en columna vertical para móvil -->
+                <div class="d-grid gap-2">
+                    {% if informe.archivo_pdf %}
+                        <a href="{% url 'descargar_pdf' informe.id %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-download"></i> Descargar PDF
+                        </a>
+                    {% else %}
+                        <button class="btn btn-outline-secondary btn-sm" disabled>Sin PDF</button>
+                    {% endif %}
+
+                    {% if puede_editar %}
+                        <a href="{% url 'editar_informe' informe.id %}" class="btn btn-warning btn-sm">
+                            <i class="bi bi-pencil"></i> Editar Informe
+                        </a>
+                        <a href="{% url 'regularizar_informe' informe.id %}" class="btn btn-success btn-sm">
+                            <i class="bi bi-check2-circle"></i> Regularizar Inspección
+                        </a>
+                    {% endif %}
+
+                    {% if puede_eliminar %}
+                        <form method="post" action="{% url 'eliminar_informe' informe.id %}" onsubmit="return confirm('¿Eliminar este informe?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm w-100">
+                                <i class="bi bi-trash"></i> Eliminar
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="card p-4 text-center text-muted">
+            <i class="bi bi-inbox" style="font-size:2rem;"></i>
+            <p class="mt-2 mb-0">No se encontraron informes.</p>
+        </div>
+    {% endif %}
+</div>
+
 {% endblock %}
